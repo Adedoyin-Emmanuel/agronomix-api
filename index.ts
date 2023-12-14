@@ -17,6 +17,7 @@ import http from "http";
 import { initSocket } from "./sockets/socket.server";
 import { helloRouter } from "./routes";
 import { logger, redisClient } from "./utils";
+import  connectDB from "./utils/mongoose";
 const PORT = process.env.PORT || 2800;
 const app = express();
 const server = http.createServer(app);
@@ -65,6 +66,7 @@ server.listen(PORT, () => {
     process.exit(1);
   });
   //connectToDb();
+  connectDB();
 });
 
 export default server;
