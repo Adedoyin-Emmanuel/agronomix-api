@@ -1,42 +1,105 @@
 import mongoose from "mongoose";
-import collections from "../repository/collection";
-const buyerSchema = new mongoose.Schema(
+
+const BuyerSchema = new mongoose.Schema(
   {
+    name: {
+      type: String,
+      max: 50,
+      required: true,
+    },
     username: {
       type: String,
+      max: 10,
       required: true,
-    },
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
+      unique: true,
     },
     email: {
       type: String,
       required: true,
-    },
-    passwordHash: {
-      type: String,
-      required: true,
-    },
-    passwordSalt: {
-      type: String,
-      required: true,
-    },
-    address: {
-      type: String,
-      required: [true, "Please enter your address"],
-    },
-    phoneNumber: {
-      type: String,
-      required: [true, "Phone number is required"],
       unique: true,
     },
+    password: {
+      type: String,
+      min: 6,
+      max: 30,
+      required: true,
+      select: false,
+    },
+
+    profilePicture: {
+      type: String,
+      required: true,
+    },
+
+    bio: {
+      type: String,
+      required: false,
+      default: "Agronomix user",
+      max: 500,
+    },
+
+    address: {
+      type: String,
+      required: false,
+    },
+
+    phoneNumber: {
+      type: String,
+      required: false,
+      unique: true,
+    },
+
+    token: {
+      type: String,
+      select: false,
+      required: false,
+    },
+
+    isVerified: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+
+    location: {
+      type: String,
+      required: false,
+      max: 50,
+      default: "",
+    },
+
+    online: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+
+    verifyEmailTokenExpire: {
+      type: Date,
+      required: false,
+      select: false,
+    },
+
+    resetPasswordToken: {
+      type: String,
+      required: false,
+      select: false,
+    },
+
+    resetPasswordTokenExpire: {
+      type: Date,
+      required: false,
+      select: false,
+    },
+
+    orders: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Orders",
+      },
+    ],
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
-export default mongoose.model(collections.buyer, buyerSchema);
+export default mongoose.model("Buyer", BuyerSchema);
