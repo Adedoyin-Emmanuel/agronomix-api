@@ -1,13 +1,45 @@
 import mongoose from "mongoose";
-import collections from "../repository/collection";
 
-const paymentSchema = new mongoose.Schema(
+export interface IPayment {
+  orderId: mongoose.Types.ObjectId;
+  buyerId: mongoose.Types.ObjectId;
+  mercantId: mongoose.Types.ObjectId;
+  amount: number;
+  paymentMethod: string;
+  status: "pending" | "fulfilled";
+}
+
+const PaymentSchema = new mongoose.Schema(
   {
-    reference: {
-      type: String,
-      required: [true, "Reference is required"],
+    orderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      required: true,
     },
-    payment_status: {
+
+    buyerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Buyer",
+      required: true,
+    },
+
+    merchantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Merchant",
+      required: true,
+    },
+
+    amount: {
+      type: Number,
+      required: true,
+    },
+
+    paymentMethod: {
+      type: String,
+      required: true,
+    },
+
+    status: {
       type: String,
       default: "pending",
       enum: {
@@ -16,7 +48,7 @@ const paymentSchema = new mongoose.Schema(
       },
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
-module.exports = mongoose.model(collections.payment, paymentSchema);
+export const Payment = mongoose.model<IPayment>("Payment", PaymentSchema);

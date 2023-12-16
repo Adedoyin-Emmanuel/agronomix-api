@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
-import collections from "../repository/collection";
+
+export interface IPaymentInfo {
+  paymentMethod: string;
+  userId: mongoose.Types.ObjectId;
+  mobileMoneyNumber: number;
+  accountNumber: number;
+}
 
 const PaymentInfoSchema = new mongoose.Schema(
   {
@@ -10,7 +16,7 @@ const PaymentInfoSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Merchant",
+      ref: "Buyer",
     },
     mobileMoneyNumber: {
       type: Number,
@@ -20,16 +26,11 @@ const PaymentInfoSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    modifiedAt: {
-      type: Date,
-      default: Date.now,
-    },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
-export default mongoose.model(collections.paymentInfo, PaymentInfoSchema);
+export const PaymentInfo = mongoose.model<IPaymentInfo>(
+  "PaymentInfo",
+  PaymentInfoSchema
+);

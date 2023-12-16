@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IOrder {
-  userId: mongoose.Types.ObjectId;
+  buyerId: mongoose.Types.ObjectId;
   companyId: mongoose.Types.ObjectId;
   totalPrice: number;
   shippingAddress: string;
@@ -12,7 +12,7 @@ export interface IOrder {
 
 const OrderSchema = new mongoose.Schema(
   {
-    userId: {
+    buyerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Buyer",
       required: true,
