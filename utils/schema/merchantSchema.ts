@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
+const merchantSchema = new mongoose.Schema({
     username: {
         type: String,
         required:true
@@ -25,6 +25,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    paymentInformation: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PaymentInfo'
+    },
+    inventory: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+    }],
     phoneNumber: {
         type: String,
         required: true
@@ -39,4 +47,5 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('User', userSchema);
+
+export default mongoose.model('Merchant', merchantSchema);

@@ -1,4 +1,3 @@
-import { required } from "joi";
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema({
@@ -6,14 +5,6 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    },
-    createdAt: {
-        type: Date,
-        default:Date.now
-    },
-    modifiedAt: {
-        type:Date,
-        default:Date.now
     },
     total_price: {
         type:Number,
@@ -24,8 +15,8 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
     payment_method: {
-        type: String,
-        required:true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PaymentMethod'
     },
     order_items: [
         {
@@ -40,7 +31,14 @@ const orderSchema = new mongoose.Schema({
     },
     referece: {
         type: String
-    }
+    }, createdAt: {
+        type: Date,
+        default:Date.now
+    },
+    modifiedAt: {
+        type:Date,
+        default:Date.now
+    },
 })
 
 module.exports = mongoose.model('Order', orderSchema);

@@ -5,9 +5,9 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    userID: {
+    merchantId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Merchant',
         required: true
     },
     description: {
