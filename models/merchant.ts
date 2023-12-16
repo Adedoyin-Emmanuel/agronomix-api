@@ -1,48 +1,140 @@
 import mongoose from "mongoose";
-import collections from "../repository/collection";
 
-const merchantSchema = new mongoose.Schema(
+export interface IMerchant extends mongoose.Document {
+  companyName: string;
+  username: string;
+  email: string;
+  password: string;
+  profilePicture: string;
+  token?: string;
+  isVerified: boolean;
+  verifyEmailToken?: string;
+  verifyEmailTokenExpire?: Date;
+  resetPasswordToken?: string;
+  products: mongoose.Types.ObjectId[];
+  resetPasswordTokenExpire?: Date;
+  orders: mongoose.Types.ObjectId[];
+  orderHistory: mongoose.Types.ObjectId[];
+  location?: string;
+  online?: boolean;
+
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
+}
+
+const MerchantSchema = new mongoose.Schema(
   {
+    companyName: {
+      type: String,
+      max: 50,
+      required: true,
+    },
+
     username: {
       type: String,
+      max: 10,
       required: true,
+      unique: true,
     },
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
-      type: String,
-      required: true,
-    },
+
     email: {
       type: String,
       required: true,
+      unique: true,
     },
     password: {
       type: String,
+      min: 6,
+      max: 30,
+      required: true,
+      select: false,
+    },
+
+    profilePicture: {
+      type: String,
       required: true,
     },
+
+    bio: {
+      type: String,
+      required: false,
+      default: "Agronomix Merchant",
+      max: 500,
+    },
+
     address: {
       type: String,
-      required: true,
+      required: false,
     },
-    paymentInformation: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "PaymentInfo",
-    },
-    inventory: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-      },
-    ],
+
     phoneNumber: {
       type: String,
-      required: true,
+      required: false,
+      unique: true,
     },
-  },
-  { timestamps: true }
-);
 
-export default mongoose.model(collections.merchant, merchantSchema);
+    token: {
+      type: String,
+      select: false,
+      required: false,
+    },
+
+    isVerified: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+
+    location: {
+      type: String,
+      required: false,
+      max: 50,
+      default: "",
+    },
+
+    online: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+
+    verifyEmailTokenExpire: {
+      type: Date,
+      required: false,
+      select: false,
+    },
+
+    resetPasswordToken: {
+      type: String,
+      required: false,
+      select: false,
+    },
+
+    resetPasswordTokenExpire: {
+      type: Date,
+      required: false,
+      select: false,
+    },
+
+    orders: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Orders",
+      },
+    ],
+    orderHistory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "OrderHistory",
+      },
+    ],
+    products: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Products",
+      },
+    ],
+  },
+  { timestamps: true, versionKey: false }
+);
+export const Merchant = mongoose.model<IMerchant>("Merchant", MerchantSchema);

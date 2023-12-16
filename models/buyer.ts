@@ -1,5 +1,26 @@
 import mongoose from "mongoose";
 
+export interface IBuyer extends mongoose.Document {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  profilePicture: string;
+  token?: string;
+  isVerified: boolean;
+  verifyEmailToken?: string;
+  verifyEmailTokenExpire?: Date;
+  resetPasswordToken?: string;
+  resetPasswordTokenExpire?: Date;
+  orders: mongoose.Types.ObjectId[];
+  orderHistory: mongoose.Types.ObjectId[];
+  location?: string;
+  online?: boolean;
+
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
+}
+
 const BuyerSchema = new mongoose.Schema(
   {
     name: {
@@ -98,8 +119,15 @@ const BuyerSchema = new mongoose.Schema(
         ref: "Orders",
       },
     ],
+
+    orderHistory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "OrderHistory",
+      },
+    ],
   },
   { timestamps: true, versionKey: false }
 );
 
-export default mongoose.model("Buyer", BuyerSchema);
+export const Buyer = mongoose.model<IBuyer>("Buyer", BuyerSchema);
