@@ -1,49 +1,58 @@
 import mongoose from "mongoose";
-import collections from "../repository/collection";
 
-const orderSchema = new mongoose.Schema(
+export interface IOrder {
+  userId: mongoose.Types.ObjectId;
+  companyId: mongoose.Types.ObjectId;
+  totalPrice: number;
+  shippingAddress: string;
+  paymentMethod: string;
+  products: mongoose.Types.ObjectId[];
+  status: "pending" | "processing" | "delivered";
+}
+
+const OrderSchema = new mongoose.Schema(
   {
-    user_id: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Buyer",
       required: true,
     },
-    total_price: {
+
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Merchant",
+      required: true,
+    },
+
+    totalPrice: {
       type: Number,
       required: true,
     },
-    shipping_address: {
+
+    shippingAddress: {
       type: String,
       required: true,
     },
-    payment_method: {
+
+    paymentMethod: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "PaymentMethod",
     },
-    order_items: [
+
+    products: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
     ],
-    order_status: {
+
+    status: {
       type: String,
       enum: ["pending", "processing", "delivered"],
       default: "pending",
-    },
-    referece: {
-      type: String,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    modifiedAt: {
-      type: Date,
-      default: Date.now,
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model(collections.order, orderSchema);
+export const Order = mongoose.model<IOrder>("Order", OrderSchema);
