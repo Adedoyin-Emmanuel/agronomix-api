@@ -1,46 +1,43 @@
 import mongoose from "mongoose";
-import collections from "../repository/collection";
 
-const productSchema = new mongoose.Schema(
+export interface IProduct {
+  name: string;
+  merchantId: mongoose.Types.ObjectId;
+  description: string;
+  category: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
+const ProductSchema = new mongoose.Schema(
   {
-    firstName: {
+    name: {
       type: String,
-      required: [true, "firstName is required"],
+      required: true,
+      ma: 20,
     },
-    lastName: {
-      type: String,
-      required: [true, "firstName is required"],
-    },
+
     merchantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Merchant",
       required: true,
     },
+
     description: {
       type: String,
       required: true,
+      max: 500,
     },
     category: {
       type: String,
-      required: [true, "Please provide a category"],
-      enum: {
-        values: ["clothing", "electronics", "cosmetics"],
-        message: "{VALUE} is not supported",
-      },
+      required: true,
     },
-    sub_category: {
-      type: String,
-      required: [true, "Please provide a sub-category"],
-      enum: {
-        values: ["laptops", "monitors", "kitchenware"],
-        message: "{VALUE} is not supported",
-      },
-    },
+
     price: {
       type: Number,
       required: true,
     },
-    quantity_available: {
+    quantity: {
       type: Number,
       required: true,
     },
@@ -48,22 +45,8 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    specifications: {
-      size: {
-        type: String,
-      },
-      color: {
-        type: String,
-      },
-      material: {
-        type: String,
-      },
-    },
-    brand: {
-      type: String,
-    },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
-module.exports = mongoose.model(collections.product, productSchema);
+export const Product = mongoose.model<IProduct>("Product", ProductSchema);
