@@ -67,7 +67,6 @@ server.listen(PORT, () => {
   //   console.log("Redis client not connected");
   //   process.exit(1);
   // });
-  //connectToDb();
   connectToDb();
 });
 

@@ -8,7 +8,7 @@ async function connectDB() {
       useUnifiedTopology: true,
     })
     .then(() => {
-      console.log("mongoose connected");
+      console.log("Connected to MongoDB");
     })
     .catch((error: any) => {
       console.log("MongoDb Failed to connect:", error);
