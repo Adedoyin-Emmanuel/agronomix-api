@@ -15,7 +15,7 @@ import { swaggerOptions } from "./docs/swagger.docs";
 import { connectToDb } from "./utils";
 import http from "http";
 import { initSocket } from "./sockets/socket.server";
-import { helloRouter, authRouter } from "./routes";
+import { helloRouter, authRouter, buyerRouter, merchantRouter } from "./routes";
 import { logger, redisClient } from "./utils";
 
 const PORT = process.env.PORT || 2800;
@@ -53,6 +53,8 @@ app.use(mongoSanitize());
 //endpoints
 app.use("/api", helloRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/buyer", buyerRouter);
+app.use("/api/merchant", merchantRouter);
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
