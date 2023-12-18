@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import config from "config";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 export interface IMerchant extends mongoose.Document {
   companyName: string;
@@ -137,4 +139,40 @@ const MerchantSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
+
+MerchantSchema.methods.generateAccessToken = function () {
+  const payload = {
+    _id: this._id,
+    username: this.username,
+    clinicName: this.name,
+    role: "merchant",
+  };
+  const JWT_SECRET: any = process.env.JWT_PRIVATE_KEY;
+  const tokenExpiration: string = config.get("App.tokenExpiration");
+
+  const options: SignOptions = {
+    expiresIn: tokenExpiration,
+  };
+
+  const token = jwt.sign(payload, JWT_SECRET, options);
+  return token;
+};
+
+MerchantSchema.methods.generateRefreshToken = function () {
+  const payload = {
+    _id: this._id,
+    username: this.username,
+    clinicName: this.name,
+    role: "merchant",
+  };
+  const JWT_SECRET: any = process.env.JWT_PRIVATE_KEY;
+
+  const options: SignOptions = {
+    expiresIn: config.get("App.refreshTokenExpiration"),
+  };
+
+  const token = jwt.sign(payload, JWT_SECRET, options);
+  return token;
+};
+
 export const Merchant = mongoose.model<IMerchant>("Merchant", MerchantSchema);

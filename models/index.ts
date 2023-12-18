@@ -5,7 +5,7 @@ import { Payment } from "./payment.model";
 import { Product } from "./product.mode";
 import { PaymentInfo } from "./paymentInfo.model";
 
-export default {
+export {
   Buyer,
   Merchant,
   Order,

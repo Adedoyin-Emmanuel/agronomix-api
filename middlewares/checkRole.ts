@@ -4,20 +4,26 @@ import { response } from "../utils";
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
-      hospital?: any;
+      buyer?: any;
+      merchant?: any;
     }
   }
+}
+interface UseCheckRoleOptions {
+  req: Request;
+  res: Response;
+  next: NextFunction;
+  role: "buyer" | "merchant";
 }
 
 const useCheckRole = (role: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    const isUser2 = req.hospital;
-    const isUser = req.user;
+    const isBuyer = req.buyer;
+    const isMerchant = req.merchant;
 
-    if (isUser2 && role === "user2") {
+    if (isBuyer && role === "buyer") {
       next();
-    } else if (isUser && role === "user") {
+    } else if (isMerchant && role === "merchant") {
       next();
     } else {
       return response(res, 403, "Access denied. Insufficient permissions.");

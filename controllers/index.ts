@@ -1,8 +1,6 @@
 import HelloController from "./hello.controller";
-import Authentication from "./authentication";
+import AuthController from "./auth.controller";
+import BuyerController from "./buyer.controller";
+import MerchantController from "./merchant.controller";
 
-
-export {
-    HelloController,
-    Authentication
-}
+export { HelloController, AuthController, BuyerController, MerchantController };

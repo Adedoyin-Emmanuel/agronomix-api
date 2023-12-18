@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import config from "config";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 export interface IBuyer extends mongoose.Document {
   name: string;
@@ -129,5 +131,40 @@ const BuyerSchema = new mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
+
+BuyerSchema.methods.generateAccessToken = function () {
+  const payload = {
+    _id: this._id,
+    username: this.username,
+    name: this.name,
+    role: "buyer",
+  };
+  const JWT_SECRET: any = process.env.JWT_PRIVATE_KEY;
+  const tokenExpiration: string = config.get("App.tokenExpiration");
+
+  const options: SignOptions = {
+    expiresIn: tokenExpiration,
+  };
+
+  const token = jwt.sign(payload, JWT_SECRET, options);
+  return token;
+};
+
+BuyerSchema.methods.generateRefreshToken = function () {
+  const payload = {
+    _id: this._id,
+    username: this.username,
+    name: this.name,
+    role: "buyer",
+  };
+  const JWT_SECRET: any = process.env.JWT_PRIVATE_KEY;
+
+  const options: SignOptions = {
+    expiresIn: config.get("App.refreshTokenExpiration"),
+  };
+
+  const token = jwt.sign(payload, JWT_SECRET, options);
+  return token;
+};
 
 export const Buyer = mongoose.model<IBuyer>("Buyer", BuyerSchema);
