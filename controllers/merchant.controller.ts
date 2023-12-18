@@ -9,7 +9,7 @@ import { response } from "./../utils";
 class MerchantController {
   static async createMerchant(req: Request, res: Response) {
     const validationSchema = Joi.object({
-      name: Joi.string().required().max(50),
+      companyName: Joi.string().required().max(50),
       username: Joi.string().required().max(20),
       email: Joi.string().required().email(),
       password: Joi.string().required().min(6).max(30),
@@ -32,12 +32,12 @@ class MerchantController {
 
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(value.password, salt);
-    const { name, username, email } = value;
+    const { companyName, username, email } = value;
     const profilePicture = `https://api.dicebear.com/7.x/micah/svg?seed=${
-      username || name
+      username || companyName
     }`;
     const valuesToStore = {
-      name,
+      companyName,
       username,
       email,
       password,
@@ -46,7 +46,7 @@ class MerchantController {
 
     const merchant = await Merchant.create(valuesToStore);
     const filteredMerchant = _.pick(merchant, [
-      "name",
+      "companyName",
       "username",
       "email",
       "createdAt",
@@ -106,7 +106,7 @@ class MerchantController {
 
     const merchant = await Merchant.find({
       $or: [
-        { name: { $regex: searchTerm, $options: "i" } },
+        { companyName: { $regex: searchTerm, $options: "i" } },
         { username: { $regex: searchTerm, $options: "i" } },
       ],
     });
