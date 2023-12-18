@@ -7,7 +7,7 @@ import { AuthRequest } from "../types/types";
 import { response } from "./../utils";
 
 class BuyerController {
-  static async createUser(req: Request, res: Response) {
+  static async createBuyer(req: Request, res: Response) {
     const validationSchema = Joi.object({
       name: Joi.string().required().max(50),
       username: Joi.string().required().max(20),
@@ -44,8 +44,8 @@ class BuyerController {
       profilePicture,
     };
 
-    const user = await Buyer.create(valuesToStore);
-    const filteredBuyer = _.pick(user, [
+    const buyer = await Buyer.create(valuesToStore);
+    const filteredBuyer = _.pick(buyer, [
       "name",
       "username",
       "email",
@@ -59,7 +59,7 @@ class BuyerController {
   static async getAllBuyers(req: Request | any, res: Response) {
     const allBuyers = await Buyer.find();
 
-    return response(res, 200, "Buyer fetched successfully", allBuyers);
+    return response(res, 200, "Buyers fetched successfully", allBuyers);
   }
 
   static async getBuyerById(req: Request, res: Response) {
