@@ -30,10 +30,24 @@ const useAuth = (req: any, res: any, next: NextFunction) => {
     }
 
     let decodeCookie: any = jwt.verify(tokenFromCookie, JWT_SECRET);
-
     if (decodeCookie && decodeCookie._id) {
-      req.user = decodeCookie;
-      next();
+      const buyerRole = "buyer",
+        merchantRole = "merchant";
+      if (decodeCookie.role === buyerRole) {
+        req.user = decodeCookie;
+        res.user = decodeCookie;
+        req.userType = "buyer";
+        next();
+      } else if (decodeCookie.role === merchantRole) {
+        req.hospital = decodeCookie;
+        res.hospital = decodeCookie;
+        req.userType = "merchant";
+
+        next();
+      } else {
+        console.log("invalid auth token!");
+        return response(res, 401, "Invalid auth token");
+      }
     } else {
       return response(res, 401, "Invalid auth token.");
     }
