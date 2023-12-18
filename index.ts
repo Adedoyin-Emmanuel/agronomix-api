@@ -1,8 +1,8 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
 import swaggerJSDoc from "swagger-jsdoc";
@@ -15,12 +15,13 @@ import { swaggerOptions } from "./docs/swagger.docs";
 import { connectToDb } from "./utils";
 import http from "http";
 import { initSocket } from "./sockets/socket.server";
-import { helloRouter } from "./routes";
+import { helloRouter, authRouter } from "./routes";
 import { logger, redisClient } from "./utils";
-import  connectDB from "./utils/mongoose";
+
 const PORT = process.env.PORT || 2800;
 const app = express();
 const server = http.createServer(app);
+
 initSocket(server);
 
 const corsOptions = {
@@ -51,6 +52,7 @@ app.use(mongoSanitize());
 
 //endpoints
 app.use("/api", helloRouter);
+app.use("/api/auth", authRouter);
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -66,7 +68,7 @@ server.listen(PORT, () => {
   //   process.exit(1);
   // });
   //connectToDb();
-  connectDB();
+  connectToDb();
 });
 
 export default server;
