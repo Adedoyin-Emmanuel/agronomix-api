@@ -20,5 +20,11 @@ buyerRouter.delete(
   [useAuth, useCheckRole("buyer")],
   BuyerController.deleteBuyer
 );
-
+buyerRouter.patch("/verify-otp/:email/:otp", BuyerController.verifyOTP);
+buyerRouter.patch("/resend-otp/:email", BuyerController.resendOTP);
+buyerRouter.get("/start-forget-passsword", BuyerController.startForgetPassword);
+buyerRouter.patch(
+  "/complete-forget-passsword",
+  BuyerController.completeForgetPassword
+);
 export default buyerRouter;
