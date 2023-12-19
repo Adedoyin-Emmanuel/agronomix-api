@@ -3,7 +3,7 @@ import Joi from "joi";
 import { Request, Response } from "express";
 import { response } from "./../utils";
 
-class Products {
+class ProductController {
 
         static async createProduct(req: Request, res: Response) {
             const createProductSchema = Joi.object({
@@ -48,8 +48,29 @@ class Products {
 
 
     static async searchProduct(req: Request, res: Response) {
+        const productSearchSchema = Joi.object({
+            searchQuery: Joi.string().required()
+        });
 
+        const { error, value } = productSearchSchema.validate(req.query);
+        if (error) response(res, 400, error.details[0].message);
+
+        const { searchQuery } = value;
+        try {
+            const product = await Product.find({
+            name: { $regex: searchQuery, $options: "i"}
+        });
+            if (product.length === 0) response(res, 400, "No product was found");
+            if (!product) response(res, 400, "No product available")
+
+            return response(res, 400, "found", product);
+        } catch (error) {
+            return response(res, 400, `Error: ${error}`);
+        }
+        
     }
 
 
 }
+
+export default ProductController;

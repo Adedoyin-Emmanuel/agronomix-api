@@ -18,7 +18,7 @@ import { initSocket } from "./sockets/socket.server";
 import { helloRouter, authRouter, buyerRouter, merchantRouter } from "./routes";
 import { logger, redisClient } from "./utils";
 
-const PORT = process.env.PORT || 2800;
+const PORT = process.env.PORT || 5800;
 const app = express();
 const server = http.createServer(app);
 
