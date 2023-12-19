@@ -27,4 +27,5 @@ buyerRouter.patch(
   "/complete-forget-passsword",
   BuyerController.completeForgetPassword
 );
+buyerRouter.patch("/change-pasword", [useAuth], BuyerController.changePassword);
 export default buyerRouter;

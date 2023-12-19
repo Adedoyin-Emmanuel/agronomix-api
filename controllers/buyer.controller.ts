@@ -249,9 +249,7 @@ class BuyerController {
         .min(6)
         .max(30)
         .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
-      confirPasswordPassword: Joi.string()
-        .required()
-        .valid(Joi.ref("newPassword")),
+      confirmPassword: Joi.string().required().valid(Joi.ref("password")),
     });
 
     try {
@@ -300,7 +298,7 @@ class BuyerController {
       if (error) throw new Error(error.details[0].message);
 
       const salt = await bcrypt.genSalt(10);
-      const password = await bcrypt.hash(value.password, salt);
+      const password = await bcrypt.hash(value.newPassword, salt);
 
       const buyer = await Buyer.findByIdAndUpdate(
         { _id: req.params.id },
@@ -311,7 +309,7 @@ class BuyerController {
       );
       return response(res, 200, "Password changed succesfully", buyer);
     } catch (error: any) {
-      return response(res, 400, error.message || "AN Error occurred");
+      return response(res, 400, error.message || "An Error occurred");
     }
   }
   static async deleteBuyer(req: Request, res: Response) {

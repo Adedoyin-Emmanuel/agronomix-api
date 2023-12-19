@@ -264,9 +264,7 @@ class MerchantController {
         .min(6)
         .max(30)
         .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
-      confirPasswordPassword: Joi.string()
-        .required()
-        .valid(Joi.ref("newPassword")),
+      confirPassword: Joi.string().required().valid(Joi.ref("password")),
     });
 
     try {
@@ -292,6 +290,41 @@ class MerchantController {
       return response(res, 200, "Password changed succesfullly");
     } catch (error: any) {
       return response(res, 400, error?.message || "An error occurred");
+    }
+  }
+  static async changePassword(req: AuthRequest | any, res: Response) {
+    const validationSchema = Joi.object({
+      oldPassword: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+      newPassword: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .valid(Joi.ref("newPassword"))
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+    });
+
+    try {
+      const { error, value } = validationSchema.validate(req.body);
+
+      if (error) throw new Error(error.details[0].message);
+
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash(value.newPassword, salt);
+
+      const buyer = await Merchant.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          password: password,
+        },
+        { new: true, runValidators: true }
+      );
+      return response(res, 200, "Password changed succesfully", buyer);
+    } catch (error: any) {
+      return response(res, 400, error.message || "AN Error occurred");
     }
   }
   static async deleteMerchant(req: Request, res: Response) {
