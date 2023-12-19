@@ -13,7 +13,12 @@ class BuyerController {
       name: Joi.string().required().max(50),
       username: Joi.string().required().max(20),
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(6).max(30),
+      password: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+      confirmPassword: Joi.string().required().valid(Joi.ref("password")),
     });
 
     const { error, value } = validationSchema.validate(req.body);
@@ -272,6 +277,41 @@ class BuyerController {
       return response(res, 200, "Password changed succesfullly");
     } catch (error: any) {
       return response(res, 400, error?.message || "An error occurred");
+    }
+  }
+  static async changePassword(req: AuthRequest | any, res: Response) {
+    const validationSchema = Joi.object({
+      oldPassword: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+      newPassword: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .valid(Joi.ref("newPassword"))
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+    });
+
+    try {
+      const { error, value } = validationSchema.validate(req.body);
+
+      if (error) throw new Error(error.details[0].message);
+
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash(value.password, salt);
+
+      const buyer = await Buyer.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          password: password,
+        },
+        { new: true, runValidators: true }
+      );
+      return response(res, 200, "Password changed succesfully", buyer);
+    } catch (error: any) {
+      return response(res, 400, error.message || "AN Error occurred");
     }
   }
   static async deleteBuyer(req: Request, res: Response) {

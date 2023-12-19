@@ -18,9 +18,7 @@ class MerchantController {
         .min(6)
         .max(30)
         .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
-      confirPasswordPassword: Joi.string()
-        .required()
-        .valid(Joi.ref("newPassword")),
+      confirmPassword: Joi.string().required().valid(Joi.ref("password")),
     });
 
     const { error, value } = validationSchema.validate(req.body);

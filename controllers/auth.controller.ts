@@ -14,7 +14,7 @@ class AuthController {
     const requestSchema = Joi.object({
       email: Joi.string().required().email(),
       password: Joi.string().required(),
-      userType: Joi.string().required(),
+      userType: Joi.string().required().valid("buyer", "merchant"),
     });
 
     const { error, value } = requestSchema.validate(req.body);
