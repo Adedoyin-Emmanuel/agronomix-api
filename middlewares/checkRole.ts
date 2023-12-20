@@ -1,14 +1,7 @@
 import { NextFunction, Request, Response } from "express";
+import "./../types/types";
 import { response } from "../utils";
 
-declare global {
-  namespace Express {
-    interface Request {
-      buyer?: any;
-      merchant?: any;
-    }
-  }
-}
 interface UseCheckRoleOptions {
   req: Request;
   res: Response;

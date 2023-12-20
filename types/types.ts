@@ -1,17 +1,17 @@
 import { Request } from "express";
 
 interface Buyer {
-  _id: String;
+  _id: string;
   role: "buyer";
-  username: String;
-  name: String;
+  username: string;
+  name: string;
 }
 
 interface Merchant {
-  _id: String;
+  _id: string;
   role: "merchant";
-  username: String;
-  clinicName: String;
+  username: string;
+  clinicName: string;
 }
 
 export type GlobalUser = Buyer | Merchant | undefined;
@@ -25,7 +25,17 @@ export interface BuyerJWTPayload extends Request {
 }
 
 export interface AuthRequest extends Request {
-  hospital: Merchant | any;
-  user: Buyer | any;
-  userType: "buyer" | "merchant";
+  merchant?: Merchant;
+  buyer?: Buyer;
+  userType?: "buyer" | "merchant";
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      buyer?: Buyer;
+      merchant?: Merchant;
+      userType?: "buyer" | "merchant";
+    }
+  }
 }

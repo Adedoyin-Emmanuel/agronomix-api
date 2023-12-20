@@ -15,10 +15,16 @@ import { swaggerOptions } from "./docs/swagger.docs";
 import { connectToDb } from "./utils";
 import http from "http";
 import { initSocket } from "./sockets/socket.server";
-import { helloRouter, authRouter, buyerRouter, merchantRouter } from "./routes";
+import {
+  helloRouter,
+  authRouter,
+  buyerRouter,
+  merchantRouter,
+  productRouter,
+} from "./routes";
 import { logger, redisClient } from "./utils";
 
-const PORT = process.env.PORT || 5800;
+const PORT = process.env.PORT || 2800;
 const app = express();
 const server = http.createServer(app);
 
@@ -55,6 +61,7 @@ app.use("/api", helloRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/buyer", buyerRouter);
 app.use("/api/merchant", merchantRouter);
+app.use("/api/product", productRouter);
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

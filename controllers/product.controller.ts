@@ -1,76 +1,156 @@
-import { Product } from "../models/product.model";
+import { Product, Merchant } from "../models";
 import Joi from "joi";
 import { Request, Response } from "express";
 import { response } from "./../utils";
 
 class ProductController {
+  static async createProduct(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      name: Joi.string().required().max(20),
+      description: Joi.string().required().max(500),
+      category: Joi.string().required(),
+      price: Joi.number().required(),
+      quantity: Joi.number().required(),
+      tags: Joi.array().items(Joi.string()).default([]),
+      image: Joi.string().required(),
+    });
 
-        static async createProduct(req: Request, res: Response) {
-            const createProductSchema = Joi.object({
-                name: Joi.string().required().max(20),
-                description: Joi.string().required().max(500),
-                category: Joi.string().required(),
-                price: Joi.number().required(),
-                quantity: Joi.number().required(),
-            })
+    /**
+     * @params {image}
+        We would be expecting the ImageURL from the client,
+       the URL of the image uploaded on 
+       uploadfly 
+     */
 
-            const {error, value} = createProductSchema.validate(req.body);
-            if (error) response(res, 400, `Error: ${error}`);
+    const { error, value } = requestSchema.validate(req.body);
+    if (error) response(res, 400, error.details[0].message);
 
-            const {name, description, category, price, quantity} = value;
+    const merchantId = req.merchant?._id;
+    value.merchantId = merchantId;
 
-            try {
-                const product = await Product.findOne({ name });
-                if (product) {
-                    const filter = name;
-                    const update = {quantity}
-                    const product = await Product.findOneAndUpdate(filter, update);
-                    return response(res, 200, `updated quantity successfully`, product);
-                };
-            } catch (error) {
-                console.error(error);
-                return response(res, 400, `Error: ${error}`)
-            }
+    console.log(value.merchantId);
 
-            const image = `https://api.dicebear.com/7.x/micah/svg?seed=${name}`
-            const product = new Product({
-                name,
-                description,
-                category,
-                price,
-                quantity,
-                image
-            });
+    const newProduct = await Product.create(value);
 
-            product.save()
-            return response(res, 200, "product created successfully", product);
-        }
+    await Merchant.findByIdAndUpdate(
+      merchantId,
+      { $push: { products: newProduct._id } },
+      { new: true }
+    );
 
+    return response(res, 200, "Product created successfully");
+  }
 
-    static async searchProduct(req: Request, res: Response) {
-        const productSearchSchema = Joi.object({
-            searchQuery: Joi.string().required()
-        });
+  static async getAllProducts(req: Request, res: Response) {
+    const allProducts = await Product.find();
 
-        const { error, value } = productSearchSchema.validate(req.query);
-        if (error) response(res, 400, error.details[0].message);
+    return response(res, 200, "Products fetched successfully", allProducts);
+  }
 
-        const { searchQuery } = value;
-        try {
-            const product = await Product.find({
-            name: { $regex: searchQuery, $options: "i"}
-        });
-            if (product.length === 0) response(res, 400, "No product was found");
-            if (!product) response(res, 400, "No product available")
+  static async getProductById(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      id: Joi.string().required(),
+    });
 
-            return response(res, 400, "found", product);
-        } catch (error) {
-            return response(res, 400, `Error: ${error}`);
-        }
-        
+    const { error, value } = requestSchema.validate(req.params);
+    if (error) return response(res, 400, error. details[0].message);
+
+    const product = await Product.findById(value.id).sort({
+      updatedAt: -1,
+    });
+
+    if (!product) return response(res, 404, "Product with given id not found");
+
+    return response(res, 200, "Product fetched successfully", product);
+  }
+
+  static async searchProduct(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      searchTerm: Joi.string().required(),
+    });
+    const { error, value } = requestSchema.validate(req.query);
+    if (error) return response(res, 400, error.details[0].message);
+
+    const { searchTerm } = value;
+
+    const product = await Product.find({
+      $or: [
+        { name: { $regex: searchTerm, $options: "i" } },
+        { tags: { $regex: searchTerm, $options: "i" } },
+      ],
+    });
+
+    if (product.length == 0) return response(res, 404, "No products found", []);
+
+    if (!product) return response(res, 400, "Could not get produt");
+
+    return response(res, 200, "Products fetched successfully", product);
+  }
+
+  static async updateProduct(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      name: Joi.string().max(20),
+      description: Joi.string().max(500),
+      category: Joi.string(),
+      price: Joi.number(),
+      quantity: Joi.number(),
+      tags: Joi.array().items(Joi.string()),
+      image: Joi.string(),
+    });
+
+    const productIdSchema = Joi.object({
+      productId: Joi.string().required(),
+    });
+
+    const { error: productIdError, value: productIdValue } =
+      productIdSchema.validate(req.params);
+    if (productIdError)
+      return response(res, 400, productIdError.details[0].message);
+
+    const productId = productIdValue.productId;
+
+    const { error, value } = requestSchema.validate(req.body);
+    if (error) return response(res, 400, error.details[0].message);
+
+    const merchantId = req.merchant?._id;
+
+    // Check if the product belongs to the merchant
+    const product = await Product.findOne({ _id: productId, merchantId });
+
+    if (!product) {
+      return response(res, 404, "Product not found");
     }
 
+    // Update the product
+    const updateProduct = await Product.findByIdAndUpdate(productId, value, {
+      new: true,
+    });
 
+    return response(res, 200, "Product updated successfully", updateProduct);
+  }
+
+  static async deleteProduct(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      id: Joi.string().required(),
+    });
+
+    const { error, value } = requestSchema.validate(req.params);
+    if (error) return response(res, 200, error.details[0].message);
+
+    //delete the product from the merchant document
+    const deletedProduct = await Product.findByIdAndDelete(value.id);
+    const merchantId = req.merchant?._id;
+    if (!deletedProduct)
+      return response(res, 404, "Product with given id not found!");
+    try {
+      await Merchant.findByIdAndUpdate(merchantId, {
+        $pull: { products: value.id },
+      });
+      return response(res, 200, "Product deleted successfully");
+    } catch (error) {
+      return response(res, 400, "An error occured while deleting the product!");
+    }
+  }
 }
 
 export default ProductController;

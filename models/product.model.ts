@@ -8,6 +8,7 @@ export interface IProduct {
   price: number;
   quantity: number;
   image: string;
+  tags: string[];
 }
 const ProductSchema = new mongoose.Schema(
   {
@@ -45,6 +46,11 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
+    tags: {
+      type: [String],
+      default:[]
+    }
   },
   { timestamps: true, versionKey: false }
 );

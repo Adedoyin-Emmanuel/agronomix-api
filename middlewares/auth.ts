@@ -34,13 +34,13 @@ const useAuth = (req: any, res: any, next: NextFunction) => {
       const buyerRole = "buyer",
         merchantRole = "merchant";
       if (decodeCookie.role === buyerRole) {
-        req.user = decodeCookie;
-        res.user = decodeCookie;
+        req.buyer = decodeCookie;
+        res.buyer = decodeCookie;
         req.userType = "buyer";
         next();
       } else if (decodeCookie.role === merchantRole) {
-        req.hospital = decodeCookie;
-        res.hospital = decodeCookie;
+        req.merchant = decodeCookie;
+        res.merchant = decodeCookie;
         req.userType = "merchant";
 
         next();
