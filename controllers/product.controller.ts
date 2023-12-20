@@ -53,7 +53,7 @@ class ProductController {
     });
 
     const { error, value } = requestSchema.validate(req.params);
-    if (error) return response(res, 400, error.details[0].message);
+    if (error) return response(res, 400, error. details[0].message);
 
     const product = await Product.findById(value.id).sort({
       updatedAt: -1,
