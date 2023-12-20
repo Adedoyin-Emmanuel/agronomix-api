@@ -1,76 +1,61 @@
-import { Product } from "../models/product.model";
+import { Product, Merchant } from "../models";
 import Joi from "joi";
 import { Request, Response } from "express";
 import { response } from "./../utils";
 
 class ProductController {
+  static async createProduct(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      name: Joi.string().required().max(20),
+      description: Joi.string().required().max(500),
+      category: Joi.string().required(),
+      price: Joi.number().required(),
+      quantity: Joi.number().required(),
+      tags: Joi.array().items(Joi.string()).default([]),
+      image: Joi.string().required(),
+    });
 
-        static async createProduct(req: Request, res: Response) {
-            const createProductSchema = Joi.object({
-                name: Joi.string().required().max(20),
-                description: Joi.string().required().max(500),
-                category: Joi.string().required(),
-                price: Joi.number().required(),
-                quantity: Joi.number().required(),
-            })
+    const { error, value } = requestSchema.validate(req.body);
+    if (error) response(res, 400, error.details[0].message);
 
-            const {error, value} = createProductSchema.validate(req.body);
-            if (error) response(res, 400, `Error: ${error}`);
+    const merchantId = req.merchant?._id;
+    value.merchantId = merchantId;
 
-            const {name, description, category, price, quantity} = value;
+    console.log(value.merchantId);
 
-            try {
-                const product = await Product.findOne({ name });
-                if (product) {
-                    const filter = name;
-                    const update = {quantity}
-                    const product = await Product.findOneAndUpdate(filter, update);
-                    return response(res, 200, `updated quantity successfully`, product);
-                };
-            } catch (error) {
-                console.error(error);
-                return response(res, 400, `Error: ${error}`)
-            }
+    const newProduct = await Product.create(value);
 
-            const image = `https://api.dicebear.com/7.x/micah/svg?seed=${name}`
-            const product = new Product({
-                name,
-                description,
-                category,
-                price,
-                quantity,
-                image
-            });
+    await Merchant.findByIdAndUpdate(
+      merchantId,
+      { $push: { products: newProduct._id } },
+      { new: true }
+    );
 
-            product.save()
-            return response(res, 200, "product created successfully", product);
-        }
+    return response(res, 200, "Product created successfully");
+  }
 
+  static async searchProduct(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      searchTerm: Joi.string().required(),
+    });
+    const { error, value } = requestSchema.validate(req.query);
+    if (error) return response(res, 400, error.details[0].message);
 
-    static async searchProduct(req: Request, res: Response) {
-        const productSearchSchema = Joi.object({
-            searchQuery: Joi.string().required()
-        });
+    const { searchTerm } = value;
 
-        const { error, value } = productSearchSchema.validate(req.query);
-        if (error) response(res, 400, error.details[0].message);
+    const product = await Product.find({
+      $or: [
+        { name: { $regex: searchTerm, $options: "i" } },
+        { tags: { $regex: searchTerm, $options: "i" } },
+      ],
+    });
 
-        const { searchQuery } = value;
-        try {
-            const product = await Product.find({
-            name: { $regex: searchQuery, $options: "i"}
-        });
-            if (product.length === 0) response(res, 400, "No product was found");
-            if (!product) response(res, 400, "No product available")
+    if (product.length == 0) return response(res, 404, "No products found", []);
 
-            return response(res, 400, "found", product);
-        } catch (error) {
-            return response(res, 400, `Error: ${error}`);
-        }
-        
-    }
+    if (!product) return response(res, 400, "Couldn't get produt");
 
-
+    return response(res, 200, "Products fetched successfully", product);
+  }
 }
 
 export default ProductController;

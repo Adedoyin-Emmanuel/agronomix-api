@@ -29,3 +29,13 @@ export interface AuthRequest extends Request {
   user: Buyer | any;
   userType: "buyer" | "merchant";
 }
+
+declare global {
+  namespace Express {
+    interface Request {
+      buyer: Buyer ;
+      merchant?: Merchant;
+      userType?: "buyer" | "merchant";
+    }
+  }
+}
