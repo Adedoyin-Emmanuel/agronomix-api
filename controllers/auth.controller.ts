@@ -8,7 +8,7 @@ import Joi from "joi";
 import jwt from "jsonwebtoken";
 import * as _ from "lodash";
 import { generateLongToken, response } from "./../utils";
-
+const http = 100 | 101 | 102;
 class AuthController {
   static async login(req: Request, res: Response) {
     const requestSchema = Joi.object({
