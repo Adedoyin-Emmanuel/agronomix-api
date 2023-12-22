@@ -20,7 +20,14 @@ authRouter.post(
 
 authRouter.post("/logout", [useAuth], AuthController.logout);
 authRouter.post("/refresh-token", AuthController.generateRefreshToken);
-
+authRouter.patch("/verify-otp/:email/:otp", AuthController.verifyOTP);
+authRouter.patch("/resend-otp/:email", AuthController.resendOTP);
+// merchantRouter.patch("/change-password/", AuthController.changePassword);
+authRouter.get("/start-forget-passsword", AuthController.startForgetPassword);
+authRouter.patch(
+  "/complete-forget-passsword",
+  AuthController.completeForgetPassword
+);
 //MISC
 // We would add this later when we've implemented the various auth methods in the auth controller
 // authRouter.get(
