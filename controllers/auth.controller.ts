@@ -38,7 +38,7 @@ class AuthController {
       const refreshToken = buyer.generateRefreshToken();
       const options = { new: true, runValidators: true };
 
-      buyer = await buyer.findOneAndUpdate(
+      buyer = await Buyer.findOneAndUpdate(
         { email },
         { token: refreshToken, online: true },
         options
