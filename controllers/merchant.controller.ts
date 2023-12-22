@@ -4,7 +4,8 @@ import Joi from "joi";
 import * as _ from "lodash";
 import { Merchant } from "../models";
 import { AuthRequest } from "../types/types";
-import { response } from "./../utils";
+import { redisClient, response } from "./../utils";
+import { generateOtp } from "../utils/utils";
 
 class MerchantController {
   static async createMerchant(req: Request, res: Response) {
@@ -12,7 +13,12 @@ class MerchantController {
       companyName: Joi.string().required().max(50),
       username: Joi.string().required().max(20),
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(6).max(30),
+      password: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+      confirmPassword: Joi.string().required().valid(Joi.ref("password")),
     });
 
     const { error, value } = validationSchema.validate(req.body);
@@ -30,6 +36,12 @@ class MerchantController {
     if (existingUsernameMerchant)
       return response(res, 400, "Username already taken");
 
+    const otp = generateOtp(6);
+
+    redisClient.set(`agronomix_${emailTaken}`, JSON.stringify(otp), {
+      EX: 60 * 60 * 24, // a day
+      NX: true,
+    });
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(value.password, salt);
     const { companyName, username, email } = value;
@@ -53,7 +65,12 @@ class MerchantController {
       "updatedAt",
       "profilePicture",
     ]);
-    return response(res, 201, "Account created successfully", filteredMerchant);
+    return response(
+      res,
+      201,
+      "Account created successfully and otp sent successfully",
+      filteredMerchant
+    );
   }
 
   static async getAllMerchants(req: Request | any, res: Response) {
@@ -183,7 +200,7 @@ class MerchantController {
       updatedMerchant
     );
   }
-
+  
   static async deleteMerchant(req: Request, res: Response) {
     const requestSchema = Joi.object({
       id: Joi.string().required(),

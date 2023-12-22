@@ -19,6 +19,7 @@ merchantRouter.put(
 merchantRouter.get("/me", [useAuth], MerchantController.getMe);
 merchantRouter.get("/", [useAuth], MerchantController.getAllMerchants);
 merchantRouter.get("/:id", [useAuth], MerchantController.getMerchantById);
+
 merchantRouter.delete(
   "/:id",
   [useAuth, useCheckRole("merchant")],

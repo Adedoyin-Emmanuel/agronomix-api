@@ -1,3 +1,4 @@
+/* eslint disable */
 import { Response, Request } from "express";
 import { Buyer, Merchant } from "../models";
 import { IBuyer } from "../models/buyer.model";
@@ -7,14 +8,15 @@ import config from "config";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
 import * as _ from "lodash";
-import { generateLongToken, response } from "./../utils";
-
+import { generateLongToken, redisClient, response } from "./../utils";
+import { generateOtp } from "../utils/utils";
+const http = 100 | 101 | 102;
 class AuthController {
   static async login(req: Request, res: Response) {
     const requestSchema = Joi.object({
       email: Joi.string().required().email(),
       password: Joi.string().required(),
-      userType: Joi.string().required(),
+      userType: Joi.string().required().valid("buyer", "merchant"),
     });
 
     const { error, value } = requestSchema.validate(req.body);
@@ -135,6 +137,170 @@ class AuthController {
       const dataToClient = { accessToken, refreshToken, ...filteredHospital };
 
       return response(res, 200, "Login successful", dataToClient);
+    }
+  }
+
+  static async resendOTP(req: Request | any, res: Response) {
+    const { email } = req.params;
+
+    const checkIfUSerExists = await Merchant.findOne({ email: email });
+
+    if (checkIfUSerExists?.isVerified)
+      return response(res, 400, "Service currently unavailable");
+
+    const otp = generateOtp(6);
+    redisClient.set(`agronomix_${email}`, JSON.stringify(otp), {
+      EX: 60 * 60 * 24, // a day
+      NX: true,
+    });
+
+    return response(res, 200, "Otp sent Successfully");
+  }
+
+  static async changePassword(req: Request, res: Response) {
+    const validationSchema = Joi.object({
+      oldPassword: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+      newPassword: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .valid(Joi.ref("newPassword"))
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+    });
+
+    const { error, value } = validationSchema.validate(req.body);
+    if (error) return response(res, 400, error.details[0].message);
+
+    const { oldPassword, newPassword, userType } = value;
+    if (userType !== "buyer" && userType !== "merchant")
+      return response(res, 400, "Invalid user type");
+
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(value.newPassword, salt);
+
+    if (userType == "buyer") {
+      const buyer = await Buyer.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          password: password,
+        },
+        { new: true, runValidators: true }
+      );
+      return response(res, 200, "Password changed succesfully", buyer);
+    } else {
+      const merchant = await Merchant.findByIdAndUpdate(
+        { _id: req.params.id },
+        {
+          password: password,
+        },
+        { new: true, runValidators: true }
+      );
+      return response(res, 200, "Password changed succesfully", merchant);
+    }
+  }
+
+  static async verifyOTP(req: Request, res: Response) {
+    const { email, otp } = req.params;
+    const { userType } = req.body;
+
+    if (userType !== "buyer" && userType !== "merchant")
+      return response(res, 400, "Invalid user type");
+
+    const cachedOTP = await redisClient.get(`agronomix_${email}`);
+
+    if (!cachedOTP) return response(res, 400, "Invalid otp");
+
+    if (cachedOTP !== otp) return response(res, 400, "Otp Mismatch");
+
+    if (userType == "buyer") {
+      await Buyer.findOneAndUpdate(
+        { email },
+        {
+          isVerified: true,
+        },
+        { new: true, runValidators: true }
+      );
+
+      return response(res, 200, "Buyer verified Successfully");
+    } else {
+      await Merchant.findOneAndUpdate(
+        { email },
+        {
+          isVerified: true,
+        },
+        { new: true, runValidators: true }
+      );
+      return response(res, 200, "Merchant verified Successfully");
+    }
+    redisClient.del(`agronomix_${otp}`);
+  }
+
+  static async startForgetPassword(req: Request | any, res: Response) {
+    const { email } = req.params;
+
+    const checkIfUSerExists =
+      (await Buyer.findOne({ email: email })) ||
+      Merchant.findOne({ email: email });
+
+    if (checkIfUSerExists)
+      return response(res, 400, "Service currently unavailable");
+
+    const otp = generateOtp(6);
+    redisClient.set(`agronomix_${email}`, JSON.stringify(otp), {
+      EX: 60 * 60 * 24, // a day
+      NX: true,
+    });
+
+    return response(
+      res,
+      200,
+      "AN otp has been sent, please proceed to complete the preocess"
+    );
+  }
+  static async completeForgetPassword(req: Request | any, res: Response) {
+    const { otp, email } = req.params;
+
+    const validationSchema = Joi.object({
+      password: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+      confirmPassword: Joi.string().required().valid(Joi.ref("password")),
+    });
+
+    try {
+      const cachedOTP = await redisClient.get(`agronomix_${email}`);
+      if (!cachedOTP) return response(res, 400, "Invalid otp");
+
+      if (cachedOTP !== otp) return response(res, 400, "Otp Mismatch");
+
+      const { error, value } = validationSchema.validate(req.body);
+      if (error) return response(res, 400, error.details[0].message);
+
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash(value.password, salt);
+
+      (await Buyer.findOneAndUpdate(
+        { email: email },
+        {
+          password: password,
+        },
+        { new: true, runValidators: true }
+      )) ||
+        Merchant.findOneAndUpdate(
+          { email: email },
+          { password: password },
+          { new: true, runValidators: true }
+        );
+
+      return response(res, 200, "Password changed succesfullly");
+    } catch (error: any) {
+      return response(res, 400, error?.message || "An error occurred");
     }
   }
 

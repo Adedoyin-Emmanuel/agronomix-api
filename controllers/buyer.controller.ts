@@ -4,7 +4,8 @@ import Joi from "joi";
 import * as _ from "lodash";
 import { Buyer } from "../models";
 import { AuthRequest } from "../types/types";
-import { response } from "./../utils";
+import { redisClient, response } from "./../utils";
+import { generateOtp } from "../utils/utils";
 
 class BuyerController {
   static async createBuyer(req: Request, res: Response) {
@@ -12,7 +13,12 @@ class BuyerController {
       name: Joi.string().required().max(50),
       username: Joi.string().required().max(20),
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(6).max(30),
+      password: Joi.string()
+        .required()
+        .min(6)
+        .max(30)
+        .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
+      confirmPassword: Joi.string().required().valid(Joi.ref("password")),
     });
 
     const { error, value } = validationSchema.validate(req.body);

@@ -72,10 +72,10 @@ app.use(useErrorHandler);
 server.listen(PORT, () => {
   console.log(`Server running on port http://localhost:${PORT}`);
   logger.info({ message: `...app listening on port http://localhost:${PORT}` });
-  // redisClient.connect().catch(() => {
-  //   console.log("Redis client not connected");
-  //   process.exit(1);
-  // });
+  redisClient.connect().catch(() => {
+    console.log("Redis client not connected");
+    process.exit(1);
+  });
   connectToDb();
 });
 
