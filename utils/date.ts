@@ -38,6 +38,7 @@ export function formatDateTime(dateTimeString: Date) {
     .toString()
     .padStart(2, "0")} ${ampm}`;
 
+  
   return {
     dateMonthYear,
     hoursAndMinutes,
