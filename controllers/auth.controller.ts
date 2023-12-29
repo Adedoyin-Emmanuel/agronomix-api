@@ -419,7 +419,7 @@ class AuthController {
     }
   }
 
-  static async forgotPassword(req: Request | any, res: Response) {
+  static async forgotPassword(req: Request, res: Response) {
     const requestSchema = Joi.object({
       email: Joi.string().required().email(),
       userType: Joi.string().required(),
@@ -502,7 +502,7 @@ class AuthController {
       const clientDomain =
         process.env.NODE_ENV === "development"
           ? `http://localhost:3000/auth/reset-password?token=${resetToken}&userType=${userType}`
-          : `https://getcaresync.vercel.app/auth/reset-password?token=${resetToken}&userType=${userType}`;
+          : `https://agronomix.vercel.app/auth/reset-password?token=${resetToken}&userType=${userType}`;
 
       const data = `
                   <div style="background-color: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);">
@@ -542,6 +542,118 @@ class AuthController {
         400,
         "Invalid user type, valid userTypes include a buyer or a merchant!"
       );
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      token: Joi.string().required(),
+      password: Joi.string().required().min(6).max(30),
+      userType: Joi.string().required(),
+    });
+
+    const { error, value } = requestSchema.validate(req.body);
+    if (error) return response(res, 400, error.details[0].message);
+    const { token, password, userType: clientUserType } = value;
+    const resetPasswordToken = token;
+    const userType = clientUserType;
+
+    if (userType === "buyer") {
+      const buyer = await Buyer.findOne({
+        resetPasswordToken,
+        resetPasswordTokenExpire: { $gt: Date.now() },
+      }).select("+resetPasswordToken +resetPasswordTokenExpire");
+
+      if (!buyer) return response(res, 400, "Invalid or expired token!");
+      // Hash and set the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      buyer.password = hashedPassword;
+      buyer.resetPasswordToken = undefined;
+      buyer.resetPasswordTokenExpire = undefined;
+
+      await buyer.save();
+
+      return response(res, 200, "Password reset successful");
+    } else if (userType == "hospital") {
+      const merchant = await Merchant.findOne({
+        resetPasswordToken,
+        resetPasswordTokenExpire: { $gt: Date.now() },
+      }).select("+resetPasswordToken +resetPasswordTokenExpire");
+
+      if (!merchant) return response(res, 400, "Invalid or expired token!");
+      // Hash and set the new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      merchant.password = hashedPassword;
+      merchant.resetPasswordToken = undefined;
+      merchant.resetPasswordTokenExpire = undefined;
+
+      await merchant.save();
+
+      return response(res, 200, "Password reset successful");
+    } else {
+      return response(res, 404, "No valid user type, please login");
+    }
+  }
+
+  static async changePassword(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      currentPassword: Joi.string().required(),
+      newPassword: Joi.string().required(),
+    });
+
+    const { error, value } = requestSchema.validate(req.body);
+    if (error) return response(res, 400, error.details[0].message);
+
+    const { currentPassword, newPassword } = value;
+    const userType = req.userType;
+
+    switch (userType) {
+      case "buyer":
+        const buyerId = req.buyer?._id;
+        const buyer: IBuyer | any = Buyer.findById(buyerId).select("+password");
+        if (!buyer) return response(res, 404, "Buyer not found");
+
+        //check if the currentPassword matches the one the buyer sent
+        const validBuyerPassword = await bcrypt.compare(
+          currentPassword,
+          buyer.password
+        );
+
+        if (!validBuyerPassword)
+          return response(res, 400, "Invalid credentials");
+
+        buyer.password = newPassword;
+        await buyer.save();
+        return response(res, 200, "Password updated successfully");
+
+      case "merchant":
+        const merchantId = req.merchant?._id;
+        const merchant: IMerchant | any =
+          Merchant.findById(merchantId).select("+password");
+
+        if (!merchant) return response(res, 404, "Merchant not found");
+
+        const validMerchantPassword = await bcrypt.compare(
+          currentPassword,
+          merchant.password
+        );
+        if (!validMerchantPassword)
+          return response(res, 400, "Invalid credentials");
+
+        merchant.password = newPassword;
+        await merchant.save();
+
+        return response(res, 200, "Password updated successfully");
+
+      default:
+        /**
+         * @see A normal user shouldn't reach this block of code. 🤣
+         * Only a malacious user would get here.
+         * We would confuse them by sending a generic error response
+         */
+        return response(res, 400, "Invalid credentials");
     }
   }
 
