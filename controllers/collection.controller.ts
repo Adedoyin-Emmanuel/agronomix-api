@@ -3,7 +3,7 @@ import { response } from "../utils";
 import Joi from "joi";
 import { Buyer, Product } from "../models";
 
-class Collection {
+class CollectionController {
   static async addProduct(req: Request, res: Response) {
     const requestSchema = Joi.object({
       productId: Joi.string().required(),
@@ -64,4 +64,4 @@ class Collection {
   }
 }
 
-export default Collection;
+export default CollectionController;
