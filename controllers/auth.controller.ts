@@ -7,7 +7,7 @@ import config from "config";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
 import * as _ from "lodash";
-import { generateLongToken, response } from "./../utils";
+import { generateLongToken, response, sendEmail } from "./../utils";
 
 class AuthController {
   static async login(req: Request, res: Response) {
@@ -217,6 +217,124 @@ class AuthController {
         //nobody
         AuthController.logout(req, res);
       }
+    }
+  }
+
+  static async sendEmailToken(req: Request, res: Response) {
+    const userType = req.userType;
+    let defaultName: any = "Agronomix";
+
+    switch (userType) {
+      case "buyer":
+        defaultName = req.buyer?.name;
+        break;
+
+      case "merchant":
+        defaultName = req.merchant?.companyName;
+        break;
+    }
+
+    const requestSchema = Joi.object({
+      email: Joi.string().required().email(),
+    });
+
+    const { error, value } = requestSchema.validate(req.query);
+
+    if (error) return response(res, 400, error.details[0].message);
+    const { email } = value;
+
+    if (userType === "buyer") {
+      const user = await Buyer.findOne({ email }).select(
+        "+verifyEmailToken +verifyEmailTokenExpire"
+      );
+      if (!user) return response(res, 404, "Buyer with given email not found");
+      const verifyEmailToken = generateLongToken();
+
+      //update the verifyEmailToken
+      user.verifyEmailToken = verifyEmailToken;
+      user.verifyEmailTokenExpire = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      await user.save();
+      const serverURL =
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:2800"
+          : req.hostname;
+
+      const domain = `${serverURL}/api/auth/confirm-email?token=${verifyEmailToken}&userType=${userType}`;
+
+      const data = `
+                <div style="background-color: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);">
+      
+                    <h1 style="color: #2EB875; font-weight:bold;">Agronomix</h1>
+                    <h3>Email Verification</h3>
+      
+                    <p style="color: #333;">Dear ${req.buyer?.name}</p>
+      
+                    <p style="color: #333;">Thank you for creating an account with Agronomix. To complete the registration process and become verified,  please verify your email address by clicking the button below:</p>
+      
+                    <a href=${domain} style="display: inline-block; margin: 20px 0; padding: 10px 20px; background-color: #2EB875; color: #fff; text-decoration: none; border-radius: 4px;">Verify My Email</a>
+                  <br/>
+                    <span>Or copy this ${domain} and paste it to your browser </span>
+      
+                    <p style="color: #333;">If you didn't create an account with us, please ignore this email.</p>
+      
+                    <p style="color: #333;">Thank you for choosing Agronomix</p>
+      
+                </div>
+      
+          `;
+
+      const result = await sendEmail("Verify Account", data, email);
+      if (!result)
+        return response(res, 400, "An error occured while sending the email");
+
+      return response(res, 200, "Verification mail sent successfully");
+    } else if (userType === "merchant") {
+      const merchant = await Merchant.findOne({ email }).select(
+        "+verifyEmailToken +verifyEmailTokenExpire"
+      );
+      if (!merchant)
+        return response(res, 404, "Merchant with given email not found");
+
+      const verifyEmailToken = generateLongToken();
+
+      //update the verifyEmailToken
+      merchant.verifyEmailToken = verifyEmailToken;
+      merchant.verifyEmailTokenExpire = new Date(
+        Date.now() + 24 * 60 * 60 * 1000
+      );
+      await merchant.save();
+      const serverURL =
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:2800"
+          : req.hostname;
+      const domain = `${serverURL}/api/auth/confirm-email?token=${verifyEmailToken}&userType=${userType}`;
+      const data = `
+                <div style="background-color: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);">
+      
+                    <h1 style="color: #2EB875; font-weight:bold;">Agronomix</h1>
+                    <h3>Email Verification</h3>
+      
+                    <p style="color: #333;">Dear ${req.merchant?.companyName},</p>
+      
+                    <p style="color: #333;">Thank you for creating a Merchant account with Agronomix. To complete the registration process and become verified,  please verify your email address by clicking the button below:</p>
+      
+                    <a href=${domain} style="display: inline-block; margin: 20px 0; padding: 10px 20px; background-color: #2EB875; color: #fff; text-decoration: none; border-radius: 4px;">Verify My Email</a>
+                  <br/>
+                    <span>Or copy this ${domain} and paste it to your browser </span>
+      
+                    <p style="color: #333;">If you didn't create an account with us, please ignore this email.</p>
+      
+                    <p style="color: #333;">Thank you for choosing Agronomix</p>
+      
+                </div>
+      
+          `;
+
+      const result = await sendEmail("Verify Account", data, email);
+      if (!result)
+        return response(res, 400, "An error occured while sending the email");
+
+      return response(res, 200, "Verification mail sent successfully");
     }
   }
 

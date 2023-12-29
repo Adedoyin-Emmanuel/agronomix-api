@@ -19,3 +19,6 @@ collectionRouter.delete(
   [useAuth, useCheckRole("buyer")],
   CollectionController.deleteProduct
 );
+
+
+export default collectionRouter;

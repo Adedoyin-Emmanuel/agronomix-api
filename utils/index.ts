@@ -4,6 +4,7 @@ import response from "./response";
 import logger from "./logger";
 import redisClient from "./redis";
 import { generateLongToken } from "./utils";
+import sendEmail from "./sendEmail";
 import "./../types/types";
 
 export {
@@ -14,4 +15,5 @@ export {
   toJavaScriptDate,
   logger,
   redisClient,
+  sendEmail
 };
