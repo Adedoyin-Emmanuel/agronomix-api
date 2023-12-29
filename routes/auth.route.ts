@@ -19,7 +19,7 @@ authRouter.post(
 );
 
 authRouter.post("/logout", [useAuth], AuthController.logout);
-authRouter.post("/refresh-token", AuthController.generateRefreshToken);
+authRouter.post("/refresh-token", AuthController.generateAccessToken);
 
 //MISC
 // We would add this later when we've implemented the various auth methods in the auth controller

@@ -66,7 +66,7 @@ class AuthController {
         path: "/",
       });
 
-      const filteredUser = _.pick(buyer, [
+      const filteredBuyer = _.pick(buyer, [
         "_id",
         "name",
         "email",
@@ -77,7 +77,7 @@ class AuthController {
         "online",
       ]);
 
-      const dataToClient = { accessToken, refreshToken, ...filteredUser };
+      const dataToClient = { accessToken, refreshToken, ...filteredBuyer };
 
       return response(res, 200, "Login successful", dataToClient);
     } else {
@@ -121,9 +121,9 @@ class AuthController {
         path: "/",
       });
 
-      const filteredHospital = _.pick(merchant, [
+      const filteredMerchant = _.pick(merchant, [
         "_id",
-        "clinicName",
+        "companyName",
         "username",
         "email",
         "profilePicture",
@@ -132,13 +132,13 @@ class AuthController {
         "online",
       ]);
 
-      const dataToClient = { accessToken, refreshToken, ...filteredHospital };
+      const dataToClient = { accessToken, refreshToken, ...filteredMerchant };
 
       return response(res, 200, "Login successful", dataToClient);
     }
   }
 
-  static async generateRefreshToken(req: Request, res: Response) {
+  static async generateAccessToken(req: Request, res: Response) {
     interface customJwtPayload {
       _id: string;
       username: string;
@@ -416,6 +416,132 @@ class AuthController {
           redirectURL +
             "?success=false&message=No valid user type, please login!"
         );
+    }
+  }
+
+  static async forgotPassword(req: Request | any, res: Response) {
+    const requestSchema = Joi.object({
+      email: Joi.string().required().email(),
+      userType: Joi.string().required(),
+    });
+
+    const { error, value } = requestSchema.validate(req.body);
+    if (error) return response(res, 400, error.details[0].message);
+
+    const { email, userType: clientUserType } = value;
+
+    const userType = clientUserType;
+
+    if (userType == "buyer") {
+      const buyer = await Buyer.findOne({ email }).select(
+        "+resetPasswordToken +resetPasswordTokenExpire"
+      );
+      if (!buyer) {
+        return response(res, 400, "Invalid or expired token!");
+      }
+
+      const resetToken = generateLongToken();
+      // 1 hour
+      const tokenExpireDate = new Date(Date.now() + 3600000);
+
+      buyer.resetPasswordToken = resetToken;
+      buyer.resetPasswordTokenExpire = tokenExpireDate;
+
+      await buyer.save();
+      const clientDomain =
+        process.env.NODE_ENV === "development"
+          ? `http://localhost:3000/auth/reset-password?token=${resetToken}&userType=${userType}`
+          : `https://agronomix.vercel.app/auth/reset-password?token=${resetToken}&userType=${userType}`;
+
+      const data = `
+                <div style="background-color: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);">
+      
+                    <h1 style="color: #2EB875;">Change Password</h1>
+      
+                    <p style="color: #333;">Dear ${buyer.name},</p>
+      
+                    <p style="color: #333;">We received a request to reset your password for your Agronomix account. To proceed with resetting your password, please click the button below. 
+                    Please note that this link is temporary and will expire in an hour, so make sure to reset your password as soon as possible.
+                    </p>
+      
+                    <a href=${clientDomain} style="display: inline-block; margin: 20px 0; padding: 10px 20px; background-color: #2EB875; color: #fff; text-decoration: none; border-radius: 4px;">Change my password</a>
+                    <br/>
+                    <span>Or copy this link ${clientDomain} and paste it to your browser </span>
+      
+                    <p style="color: #333;">If you didn't initiate a password reset, please ignore this email.</p>
+      
+                    <p style="color: #333;">Thank you for choosing Agronomix.</p>
+      
+                </div>
+          `;
+
+      const result = await sendEmail("Change Password", data, email);
+      if (!result)
+        return response(res, 400, "An error occured while sending the email");
+
+      return response(
+        res,
+        200,
+        "Password reset link sent to mail successfully"
+      );
+    } else if (userType == "merchant") {
+      const merchant = await Merchant.findOne({ email }).select(
+        "+resetPasswordToken +resetPasswordTokenExpire"
+      );
+      if (!merchant) {
+        return response(res, 404, "Hospital not found!");
+      }
+
+      const resetToken = generateLongToken();
+      // 1 hour
+      const tokenExpireDate = new Date(Date.now() + 3600000);
+
+      merchant.resetPasswordToken = resetToken;
+      merchant.resetPasswordTokenExpire = tokenExpireDate;
+      await merchant.save();
+      const clientDomain =
+        process.env.NODE_ENV === "development"
+          ? `http://localhost:3000/auth/reset-password?token=${resetToken}&userType=${userType}`
+          : `https://getcaresync.vercel.app/auth/reset-password?token=${resetToken}&userType=${userType}`;
+
+      const data = `
+                  <div style="background-color: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);">
+      
+                    <h1 style="color: #2EB875;">Change Password</h1>
+      
+                    <p style="color: #333;">Dear ${merchant.companyName},</p>
+      
+                    <p style="color: #333;">We received a request to reset your password for your Agronomix Merchant account. To proceed with resetting your password, please click the button below. 
+                    Please note that this link is temporary and will expire in an hour, so make sure to reset your password as soon as possible.
+                    </p>
+      
+                    <a href=${clientDomain} style="display: inline-block; margin: 20px 0; padding: 10px 20px; background-color: #2EB875; color: #fff; text-decoration: none; border-radius: 4px;">Change my password</a>
+                    <br/>
+                    <span>Or copy this link ${clientDomain} and paste it to your browser </span>
+      
+                    <p style="color: #333;">If you didn't initiate a password reset, please ignore this email.</p>
+      
+                    <p style="color: #333;">Thank you for choosing Agronomix.</p>
+      
+                </div>
+
+          `;
+
+      const result = await sendEmail("Change Password", data, email);
+      if (!result)
+        return response(res, 400, "An error occured while sending the email");
+
+      return response(
+        res,
+        200,
+        "Password reset link sent to mail successfully"
+      );
+    } else {
+      return response(
+        res,
+        400,
+        "Invalid user type, valid userTypes include a buyer or a merchant!"
+      );
     }
   }
 
