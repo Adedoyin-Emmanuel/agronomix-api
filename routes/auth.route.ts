@@ -4,6 +4,7 @@ import { useAuth } from "../middlewares";
 import {
   useLoginRateLimiter,
   useVerifyLimiter,
+  useChangePasswordLimiter,
 } from "../middlewares/rateLimiter";
 import {
   useLoginSlowDown,
@@ -21,29 +22,33 @@ authRouter.post(
 authRouter.post("/logout", [useAuth], AuthController.logout);
 authRouter.post("/refresh-token", AuthController.generateAccessToken);
 
-//MISC
-// We would add this later when we've implemented the various auth methods in the auth controller
-// authRouter.get(
-//   "/verify-email",
-//   [useAuth, useVerifyLimiter, useVerifySlowDown],
-//   AuthController.sendEmailToken
-// );
-// authRouter.get(
-//   "/confirm-email",
-//   [useVerifyLimiter, useVerifySlowDown],
-//   AuthController.verifyEmailToken
-// );
+authRouter.get(
+  "/verify-email",
+  [useAuth, useVerifyLimiter, useVerifySlowDown],
+  AuthController.sendEmailToken
+);
+authRouter.get(
+  "/confirm-email",
+  [useVerifyLimiter, useVerifySlowDown],
+  AuthController.verifyEmailToken
+);
 
-// authRouter.post(
-//   "/forgot-password",
-//   [useVerifyLimiter, useVerifySlowDown],
-//   AuthController.forgotPassword
-// );
+authRouter.post(
+  "/forgot-password",
+  [useVerifyLimiter, useVerifySlowDown],
+  AuthController.forgotPassword
+);
 
-// authRouter.post(
-//   "/reset-password",
-//   [useVerifyLimiter, useVerifySlowDown],
-//   AuthController.resetPassword
-// );
+authRouter.post(
+  "/reset-password",
+  [useVerifyLimiter, useVerifySlowDown],
+  AuthController.resetPassword
+);
+
+authRouter.post(
+  "/change-password",
+  [useAuth, useChangePasswordLimiter],
+  AuthController.changePassword
+);
 
 export default authRouter;
