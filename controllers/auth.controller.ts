@@ -338,6 +338,87 @@ class AuthController {
     }
   }
 
+  static async verifyEmailToken(req: Request, res: Response) {
+    const requestSchema = Joi.object({
+      token: Joi.string().required(),
+      userType: Joi.string().required(),
+    });
+
+    const { error, value } = requestSchema.validate(req.query);
+    if (error) return response(res, 400, error.details[0].message);
+    const redirectURL =
+      process.env.NODE_ENV === "development"
+        ? `http://localhost:3000/auth/verified`
+        : `https://agronomix.vercel.app/auth/verified`;
+
+    const { token, userType } = value;
+
+    const verifyEmailToken = token;
+    if (userType === "buyer") {
+      const buyer = await Buyer.findOne({
+        verifyEmailToken,
+        verifyEmailTokenExpire: { $gt: Date.now() },
+      });
+
+      if (!buyer) {
+        console.log(buyer);
+        return res
+          .status(400)
+          .redirect(
+            redirectURL +
+              "?success=false&message=Invalid or expired token!&userType=buyer"
+          );
+      }
+
+      buyer.verifyEmailToken = undefined;
+      buyer.verifyEmailTokenExpire = undefined;
+      buyer.isVerified = true;
+
+      await buyer.save();
+
+      return res
+        .status(200)
+        .redirect(
+          redirectURL +
+            "?success=true&message=Buyer Email verified successfully&userType=buyer"
+        );
+    } else if (userType == "hospital") {
+      const merchant = await Merchant.findOne({
+        verifyEmailToken,
+        verifyEmailTokenExpire: { $gt: Date.now() },
+      });
+
+      if (!merchant) {
+        return res
+          .status(400)
+          .redirect(
+            redirectURL +
+              "?success=false&message=Invalid or expired token!&userType=merchant"
+          );
+      }
+
+      merchant.verifyEmailToken = undefined;
+      merchant.verifyEmailTokenExpire = undefined;
+      merchant.isVerified = true;
+
+      await merchant.save();
+
+      return res
+        .status(200)
+        .redirect(
+          redirectURL +
+            "?success=true&message=Merchant email verified successfully&userType=merchant"
+        );
+    } else {
+      return res
+        .status(400)
+        .redirect(
+          redirectURL +
+            "?success=false&message=No valid user type, please login!"
+        );
+    }
+  }
+
   static async logout(req: Request | any, res: Response) {
     switch (req.userType) {
       case "buyer":
