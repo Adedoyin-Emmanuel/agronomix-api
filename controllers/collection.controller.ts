@@ -35,6 +35,7 @@ class CollectionController {
       collection
     );
   }
+    
 
   static async deleteProduct(req: Request, res: Response) {
     const requestSchema = Joi.object({
