@@ -11,7 +11,7 @@ interface Merchant {
   _id: string;
   role: "merchant";
   username: string;
-  clinicName: string;
+  companyName: string;
 }
 
 export type GlobalUser = Buyer | Merchant | undefined;

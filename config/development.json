@@ -3,9 +3,10 @@
     "request-limit": 200,
     "tokenExpiration": "1hr",
     "refreshTokenExpiration": "7d",
-    "login-request-limit": 100,
+    "login-request-limit": 5,
     "verify-user-request-limit": 5,
-    "create-request-limit": 100,
+    "create-request-limit": 5,
+    "change-password-limit": 1,
     "cookieAccessTokenExpiration": 3600000,
     "cookieRefreshTokenExpiration": 604800000
   }

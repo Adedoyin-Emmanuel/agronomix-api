@@ -21,6 +21,7 @@ import {
   buyerRouter,
   merchantRouter,
   productRouter,
+  collectionRouter,
 } from "./routes";
 import { logger, redisClient } from "./utils";
 
@@ -60,6 +61,7 @@ app.use(mongoSanitize());
 app.use("/api", helloRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/buyer", buyerRouter);
+app.use("/api/buyer/collection", collectionRouter);
 app.use("/api/merchant", merchantRouter);
 app.use("/api/product", productRouter);
 

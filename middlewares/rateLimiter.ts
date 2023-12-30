@@ -32,4 +32,10 @@ export const useVerifyLimiter = rateLimit({
   message: defaultMessage,
 });
 
+export const useChangePasswordLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: config.get("App.change-password-limit"),
+  message: defaultMessage,
+});
+
 export default useRateLimiter;
