@@ -22,6 +22,7 @@ import {
   merchantRouter,
   productRouter,
   collectionRouter,
+  transactionRouter,
 } from "./routes";
 import { logger, redisClient } from "./utils";
 
@@ -64,6 +65,7 @@ app.use("/api/buyer", buyerRouter);
 app.use("/api/buyer/collection", collectionRouter);
 app.use("/api/merchant", merchantRouter);
 app.use("/api/product", productRouter);
+app.use("/api/transaction", transactionRouter);
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -74,10 +76,6 @@ app.use(useErrorHandler);
 server.listen(PORT, () => {
   console.log(`Server running on port http://localhost:${PORT}`);
   logger.info({ message: `...app listening on port http://localhost:${PORT}` });
-  // redisClient.connect().catch(() => {
-  //   console.log("Redis client not connected");
-  //   process.exit(1);
-  // });
   connectToDb();
 });
 
