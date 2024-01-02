@@ -36,9 +36,27 @@ class TransactionController {
   }
 
   static async verify(req: Request, res: Response) {
-    const requestSchema = Joi.object({});
+    const requestSchema = Joi.object({
+      transactionRef: Joi.string().required(),
+    });
 
-    return response(res, 200, "Transaction verified successfully");
+    const { error, value } = requestSchema.validate(req.params);
+    if (error) return response(res, 400, error.details[0].message);
+
+    const squadResponse = await Axios.get(`/verify/${value.transactionRef}`);
+    if (squadResponse.status !== 200)
+      return response(
+        res,
+        400,
+        `An error occured! ${squadResponse.data?.message}`
+      );
+
+    return response(
+      res,
+      200,
+      "Transaction verified successfully",
+      squadResponse.data?.data
+    );
   }
 
   static async refund(req: Request, res: Response) {
