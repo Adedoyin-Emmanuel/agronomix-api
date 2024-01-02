@@ -5,6 +5,7 @@ import BuyerController from "./buyer.controller";
 import MerchantController from "./merchant.controller";
 import ProductController from "./product.controller";
 import CollectionController from "./collection.controller";
+import TransactionController from "./transaction.controller";
 
 export {
   HelloController,
@@ -13,4 +14,5 @@ export {
   MerchantController,
   ProductController,
   CollectionController,
+  TransactionController,
 };
