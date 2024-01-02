@@ -19,11 +19,11 @@ transactionRouter.post(
   [useAuth, useCheckRole("buyer")],
   TransactionController.refund
 );
+transactionRouter.post("/webhook", TransactionController.receiveWebhook);
 
 /**
  * TODO Add transaction history for merchant and buyer
  * That shouldn't be tough!
  */
-
 
 export default transactionRouter;

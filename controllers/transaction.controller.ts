@@ -20,6 +20,15 @@ class TransactionController {
 
     return response(res, 200, "Funds reimbursed successfully");
   }
+
+  static async receiveWebhook(req: Request, res: Response) {
+    /**
+     * TODO Implement Transaction Reference Checker
+     */
+    console.log("Webhook received successfully");
+    console.log(req.body);
+    return response(res, 200, "Webhook received successfully");
+  }
 }
 
 export default TransactionController;
