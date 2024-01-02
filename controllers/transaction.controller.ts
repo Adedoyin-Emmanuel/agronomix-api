@@ -116,7 +116,7 @@ class TransactionController {
 
   static async receiveWebhook(req: Request, res: Response) {
     /**
-     * TODO Implement Transaction Reference Checker
+     * TODO Implement Transaction Reference Checker, Implement Transaction History
      */
 
     const SQUAD_SECRET: any = process.env.SQUAD_PRIVATE_KEY;
