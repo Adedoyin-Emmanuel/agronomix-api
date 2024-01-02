@@ -2,12 +2,37 @@ import { Response, Request } from "express";
 import { response } from "../utils";
 import * as crypto from "crypto";
 import Joi from "joi";
+import { Axios } from "../utils";
 
 class TransactionController {
   static async initiate(req: Request, res: Response) {
-    const requestSchema = Joi.object({});
+    const requestSchema = Joi.object({
+      email: Joi.string().email().required(),
+      amount: Joi.number().required().min(0),
+      initiate_type: Joi.string().default("inline"),
+      currency: Joi.string().required().valid("NGN", "USD"),
+      customer_name: Joi.string().required(),
+      callback_url: Joi.string().required(),
+    });
 
-    return response(res, 200, "Transaction initiated successfully");
+    const { error, value } = requestSchema.validate(req.body);
+    if (error) return response(res, 400, error.details[0].message);
+
+    const squadResponse = await Axios.post("/transaction/initiate", value);
+
+    if (squadResponse.status !== 200)
+      return response(
+        res,
+        400,
+        `An error occured! ${squadResponse.data?.message}`
+      );
+
+    return response(
+      res,
+      200,
+      "Transaction initiated successfully",
+      squadResponse.data?.data
+    );
   }
 
   static async verify(req: Request, res: Response) {
