@@ -1,5 +1,6 @@
 import { Response, Request } from "express";
 import { response } from "../utils";
+import * as crypto from "crypto";
 import Joi from "joi";
 
 class TransactionController {
@@ -25,9 +26,21 @@ class TransactionController {
     /**
      * TODO Implement Transaction Reference Checker
      */
-    console.log("Webhook received successfully");
-    console.log(req.body);
-    return response(res, 200, "Webhook received successfully");
+
+    const SQUAD_SECRET: any = process.env.SQUAD_PRIVATE_KEY;
+    const hash = crypto
+      .createHmac("sha512", SQUAD_SECRET)
+      .update(JSON.stringify(req.body))
+      .digest("hex")
+      .toUpperCase();
+    if (hash == req.headers["x-squad-encrypted-body"]) {
+      console.log("Webhook received successfully");
+      console.log(req.body);
+      const squadHash = req.headers["x-squad-encrypted-body"];
+      return response(res, 200, "Webhook received successfully");
+    } else {
+      return response(res, 400, "Invalid webhook response");
+    }
   }
 }
 
