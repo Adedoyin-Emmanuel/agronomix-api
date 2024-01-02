@@ -5,6 +5,7 @@ import logger from "./logger";
 import redisClient from "./redis";
 import { generateLongToken } from "./utils";
 import sendEmail from "./sendEmail";
+import Axios from "./axios";
 import "./../types/types";
 
 export {
@@ -15,5 +16,6 @@ export {
   toJavaScriptDate,
   logger,
   redisClient,
-  sendEmail
+  sendEmail,
+  Axios
 };
