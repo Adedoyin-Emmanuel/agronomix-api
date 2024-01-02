@@ -9,16 +9,26 @@ class TransactionController {
     const requestSchema = Joi.object({
       email: Joi.string().email().required(),
       amount: Joi.number().required().min(0),
-      initiate_type: Joi.string().default("inline"),
+      initiateType: Joi.string().default("inline"),
       currency: Joi.string().required().valid("NGN", "USD"),
-      customer_name: Joi.string().required(),
-      callback_url: Joi.string().required(),
+      customerName: Joi.string().required(),
+      callbackUrl: Joi.string().required(),
     });
 
     const { error, value } = requestSchema.validate(req.body);
     if (error) return response(res, 400, error.details[0].message);
+    const { email, amount, initiateType, currency, customerName, callbackUrl } =
+      value;
+    const dataToSend = {
+      email,
+      amount,
+      initiate_type: initiateType,
+      currency,
+      customer_name: customerName,
+      callback_url: callbackUrl,
+    };
 
-    const squadResponse = await Axios.post("/transaction/initiate", value);
+    const squadResponse = await Axios.post("/transaction/initiate", dataToSend);
 
     if (squadResponse.status !== 200)
       return response(
@@ -60,9 +70,48 @@ class TransactionController {
   }
 
   static async refund(req: Request, res: Response) {
-    const requestSchema = Joi.object({});
+    const requestSchema = Joi.object({
+      refundType: Joi.string().required().valid("full", "partial"),
+      transactionRef: Joi.string().required(),
+      refundAmount: Joi.number().required(),
+      reasonForRefund: Joi.string().required(),
+      gatewayTransactionRef: Joi.string().required(),
+    });
 
-    return response(res, 200, "Funds reimbursed successfully");
+    const { error, value } = requestSchema.validate(req.body);
+    if (error) return response(res, 400, error.details[0].message);
+
+    const {
+      refundType,
+      transactionRef,
+      refundAmount,
+      reasonForRefund,
+      gatewayTransactionRef,
+    } = value;
+
+    const dataToSend = {
+      gateway_transaction_ref: gatewayTransactionRef,
+      transaction_ref: transactionRef,
+      refund_type: refundType,
+      reason_for_refund: reasonForRefund,
+      refund_amount: refundAmount,
+    };
+
+    const squadResponse = await Axios.post("/transaction/refund", dataToSend);
+
+    if (squadResponse.status !== 200)
+      return response(
+        res,
+        400,
+        `An error occured! ${squadResponse.data?.message}`
+      );
+
+    return response(
+      res,
+      200,
+      "Funds reimbursed successfully",
+      squadResponse.data?.data
+    );
   }
 
   static async receiveWebhook(req: Request, res: Response) {
