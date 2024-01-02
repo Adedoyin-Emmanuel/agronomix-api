@@ -24,3 +24,6 @@ transactionRouter.post(
  * TODO Add transaction history for merchant and buyer
  * That shouldn't be tough!
  */
+
+
+export default transactionRouter;

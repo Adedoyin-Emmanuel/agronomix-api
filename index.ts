@@ -22,6 +22,7 @@ import {
   merchantRouter,
   productRouter,
   collectionRouter,
+  transactionRouter,
 } from "./routes";
 import { logger, redisClient } from "./utils";
 
@@ -64,6 +65,7 @@ app.use("/api/buyer", buyerRouter);
 app.use("/api/buyer/collection", collectionRouter);
 app.use("/api/merchant", merchantRouter);
 app.use("/api/product", productRouter);
+app.use("/api/transaction", transactionRouter);
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
