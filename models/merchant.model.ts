@@ -8,6 +8,7 @@ export interface IMerchant extends mongoose.Document {
   email: string;
   password: string;
   profilePicture: string;
+  phoneNumber?: string;
   token?: string;
   isVerified: boolean;
   verifyEmailToken?: string;
@@ -70,7 +71,7 @@ const MerchantSchema = new mongoose.Schema(
     },
 
     phoneNumber: {
-      type: String,
+      type: Number,
       required: false,
       unique: true,
     },

@@ -9,6 +9,7 @@ export interface IBuyer extends mongoose.Document {
   password: string;
   profilePicture: string;
   token?: string;
+  phoneNumber?: number;
   isVerified: boolean;
   verifyEmailToken?: string;
   verifyEmailTokenExpire?: Date;
@@ -68,7 +69,7 @@ const BuyerSchema = new mongoose.Schema(
     },
 
     phoneNumber: {
-      type: String,
+      type: Number,
       required: false,
       unique: true,
     },
