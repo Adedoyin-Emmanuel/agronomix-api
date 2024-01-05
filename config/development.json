@@ -6,7 +6,7 @@
     "login-request-limit": 5,
     "verify-user-request-limit": 5,
     "create-request-limit": 5,
-    "change-password-limit": 1,
+    "change-password-limit": 5,
     "cookieAccessTokenExpiration": 3600000,
     "cookieRefreshTokenExpiration": 604800000
   }
