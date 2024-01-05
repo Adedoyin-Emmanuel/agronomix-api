@@ -75,6 +75,8 @@ class AuthController {
         "createdAt",
         "updatedAt",
         "online",
+        "isVerified",
+        "bio"
       ]);
 
       const dataToClient = { accessToken, refreshToken, ...filteredBuyer };
@@ -130,6 +132,8 @@ class AuthController {
         "createdAt",
         "updatedAt",
         "online",
+        "isVerified",
+        "bio"
       ]);
 
       const dataToClient = { accessToken, refreshToken, ...filteredMerchant };
