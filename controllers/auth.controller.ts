@@ -612,7 +612,9 @@ class AuthController {
     switch (userType) {
       case "buyer":
         const buyerId = req.buyer?._id;
-        const buyer: IBuyer | any = Buyer.findById(buyerId).select("+password");
+        const buyer: IBuyer | any = await Buyer.findById(buyerId).select(
+          "+password"
+        );
         if (!buyer) return response(res, 404, "Buyer not found");
 
         //check if the currentPassword matches the one the buyer sent
@@ -630,8 +632,11 @@ class AuthController {
 
       case "merchant":
         const merchantId = req.merchant?._id;
-        const merchant: IMerchant | any =
-          Merchant.findById(merchantId).select("+password");
+        const merchant: IMerchant | any = await Merchant.findOne({
+          _id: merchantId,
+        }).select("+password");
+
+        console.log(merchant);
 
         if (!merchant) return response(res, 404, "Merchant not found");
 
