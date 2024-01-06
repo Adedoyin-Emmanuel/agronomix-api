@@ -69,15 +69,18 @@ class AuthController {
       const filteredBuyer = _.pick(buyer, [
         "_id",
         "name",
-        "email",
         "username",
+        "email",
         "profilePicture",
+        "bio",
+        "isVerified",
+        "location",
+        "online",
+        "orders",
+        "orderHistory",
+        "collections",
         "createdAt",
         "updatedAt",
-        "online",
-        "isVerified",
-        "bio",
-        "location",
       ]);
 
       const dataToClient = { accessToken, refreshToken, ...filteredBuyer };
