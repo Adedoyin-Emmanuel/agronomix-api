@@ -121,11 +121,12 @@ class MerchantController {
 
   static async updateMerchant(req: Request, res: Response) {
     const requestSchema = Joi.object({
-      name: Joi.string().required().max(50),
-      username: Joi.string().required().max(20),
-      bio: Joi.string().required().max(500),
-      email: Joi.string().required().email(),
-      location: Joi.string().required().max(50),
+      name: Joi.string().max(50),
+      username: Joi.string().max(20),
+      bio: Joi.string().max(500),
+      email: Joi.string().email(),
+      location: Joi.string().max(50),
+      profilePicture: Joi.string()
     });
 
     const { error: requestBodyError, value: requestBodyValue } =
@@ -133,17 +134,9 @@ class MerchantController {
     if (requestBodyError)
       return response(res, 400, requestBodyError.details[0].message);
 
-    const requestIdSchema = Joi.object({
-      id: Joi.string().required(),
-    });
-
-    const { error: requestParamsError, value: requestParamsValue } =
-      requestIdSchema.validate(req.params);
-    if (requestParamsError)
-      return response(res, 400, requestParamsError.details[0].message);
-
+   
     //check if user with id exist
-    const { id } = requestParamsValue;
+    const id = req.merchant?._id;
     const existingMerchant = await Merchant.findById(id);
     if (!existingMerchant)
       return response(res, 404, "Merchant with given id not found");
@@ -168,7 +161,7 @@ class MerchantController {
       }
     }
 
-    //update the user
+    //update the merchant
     const options = { new: true, runValidators: true };
     const updatedMerchant = await Merchant.findByIdAndUpdate(
       id,
