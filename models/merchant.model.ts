@@ -20,6 +20,7 @@ export interface IMerchant extends mongoose.Document {
   orderHistory: mongoose.Types.ObjectId[];
   location?: string;
   online?: boolean;
+  role: "merchant";
 
   generateAccessToken(): string;
   generateRefreshToken(): string;
@@ -99,6 +100,12 @@ const MerchantSchema = new mongoose.Schema(
       type: Boolean,
       required: false,
       default: false,
+    },
+
+    role: {
+      type: String,
+      required: false,
+      default: "merchant",
     },
 
     verifyEmailTokenExpire: {

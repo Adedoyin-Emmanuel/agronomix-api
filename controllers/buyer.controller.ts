@@ -118,11 +118,12 @@ class BuyerController {
 
   static async updateBuyer(req: Request, res: Response) {
     const requestSchema = Joi.object({
-      name: Joi.string().required().max(50),
-      username: Joi.string().required().max(20),
-      bio: Joi.string().required().max(500),
-      email: Joi.string().required().email(),
-      location: Joi.string().required().max(50),
+      name: Joi.string().max(50),
+      username: Joi.string().max(20),
+      bio: Joi.string().max(500),
+      email: Joi.string().email(),
+      location: Joi.string().max(50),
+      profilePicture: Joi.string(),
     });
 
     const { error: requestBodyError, value: requestBodyValue } =
@@ -130,17 +131,8 @@ class BuyerController {
     if (requestBodyError)
       return response(res, 400, requestBodyError.details[0].message);
 
-    const requestIdSchema = Joi.object({
-      id: Joi.string().required(),
-    });
-
-    const { error: requestParamsError, value: requestParamsValue } =
-      requestIdSchema.validate(req.params);
-    if (requestParamsError)
-      return response(res, 400, requestParamsError.details[0].message);
-
     //check if user with id exist
-    const { id } = requestParamsValue;
+    const id = req.buyer?._id;
     const existingBuyer = await Buyer.findById(id);
     if (!existingBuyer)
       return response(res, 404, "Buyer with given id not found");
