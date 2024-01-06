@@ -140,6 +140,7 @@ class AuthController {
         "online",
         "role",
         "orders",
+        "customers",
         "orderHistory",
         "products",
         "createdAt",

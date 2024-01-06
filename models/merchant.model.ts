@@ -18,6 +18,7 @@ export interface IMerchant extends mongoose.Document {
   resetPasswordTokenExpire?: Date;
   orders: mongoose.Types.ObjectId[];
   orderHistory: mongoose.Types.ObjectId[];
+  customers: mongoose.Types.ObjectId[];
   location?: string;
   online?: boolean;
   role: "merchant";
@@ -130,6 +131,13 @@ const MerchantSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Orders",
+      },
+    ],
+
+    customers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Buyer",
       },
     ],
     orderHistory: [
