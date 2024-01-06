@@ -77,8 +77,8 @@ class MerchantController {
     return response(res, 200, "Merchant fetched successfully", merchant);
   }
 
-  static async getMe(req: AuthRequest | any, res: Response) {
-    const merchant = await Merchant.findById(req.buyer._id);
+  static async getMe(req: Request, res: Response) {
+    const merchant = await Merchant.findById(req.merchant?._id as string);
     if (!merchant)
       return response(res, 404, "Merchant with given id not found");
     return response(res, 200, "Merchant info fetched successfully", merchant);
