@@ -8,7 +8,7 @@ buyerRouter.post("/", [useCreateUserLimiter], BuyerController.createBuyer);
 buyerRouter.get("/search", BuyerController.searchBuyer);
 buyerRouter.get("/online", BuyerController.getOnlineBuyers);
 buyerRouter.put(
-  "/:id",
+  "/",
   [useAuth, useCheckRole("buyer")],
   BuyerController.updateBuyer
 );

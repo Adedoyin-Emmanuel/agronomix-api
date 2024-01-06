@@ -12,7 +12,7 @@ merchantRouter.post(
 merchantRouter.get("/search", MerchantController.searchMerchants);
 merchantRouter.get("/online", MerchantController.getOnlineMerchants);
 merchantRouter.put(
-  "/:id",
+  "/",
   [useAuth, useCheckRole("merchant")],
   MerchantController.updateMerchant
 );

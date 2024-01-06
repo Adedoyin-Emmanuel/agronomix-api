@@ -20,6 +20,7 @@ export interface IBuyer extends mongoose.Document {
   collections: mongoose.Types.ObjectId[];
   location?: string;
   online?: boolean;
+  role: "buyer";
 
   generateAccessToken(): string;
   generateRefreshToken(): string;
@@ -97,6 +98,12 @@ const BuyerSchema = new mongoose.Schema(
       type: Boolean,
       required: false,
       default: false,
+    },
+
+    role: {
+      type: String,
+      required: false,
+      default: "buyer"
     },
 
     verifyEmailTokenExpire: {
