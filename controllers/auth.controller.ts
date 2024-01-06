@@ -133,12 +133,15 @@ class AuthController {
         "username",
         "email",
         "profilePicture",
+        "bio",
+        "isVerified",
+        "location",
+        "online",
+        "orders",
+        "orderHistory",
+        "products",
         "createdAt",
         "updatedAt",
-        "online",
-        "isVerified",
-        "bio",
-        "location",
       ]);
 
       const dataToClient = { accessToken, refreshToken, ...filteredMerchant };
