@@ -9,6 +9,8 @@ export interface IProduct {
   quantity: number;
   image: string;
   tags: string[];
+  reviews: string[];
+  rating: number;
 }
 const ProductSchema = new mongoose.Schema(
   {
@@ -49,8 +51,21 @@ const ProductSchema = new mongoose.Schema(
 
     tags: {
       type: [String],
-      default:[]
-    }
+      default: [],
+    },
+
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
+
+    rating: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
   { timestamps: true, versionKey: false }
 );
