@@ -7,7 +7,7 @@
     "lint": "eslint .",
     "check-lint": "eslint [0-9]*.ts",
     "build": "rimraf ./dist && tsc index.ts --esModuleInterop true --target ES6 --module nodenext --moduleResolution nodenext --outDir dist",
-    "start": "npm run build && node ./dist/index.js",
+    "start": "bun run build && node ./dist/index.js",
     "dev": "nodemon index.ts",
     "test": "jest",
     "full-test": "eslint */[0-9]*.ts && jest --watchAll --verbose",
