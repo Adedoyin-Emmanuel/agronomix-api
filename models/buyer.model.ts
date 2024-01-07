@@ -18,6 +18,7 @@ export interface IBuyer extends mongoose.Document {
   orders: mongoose.Types.ObjectId[];
   orderHistory: mongoose.Types.ObjectId[];
   collections: mongoose.Types.ObjectId[];
+  reviews: mongoose.Types.ObjectId[];
   location?: string;
   online?: boolean;
   role: "buyer";
@@ -103,7 +104,7 @@ const BuyerSchema = new mongoose.Schema(
     role: {
       type: String,
       required: false,
-      default: "buyer"
+      default: "buyer",
     },
 
     verifyEmailTokenExpire: {
@@ -142,6 +143,13 @@ const BuyerSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
+      },
+    ],
+
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
       },
     ],
   },

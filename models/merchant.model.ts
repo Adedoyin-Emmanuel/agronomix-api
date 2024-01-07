@@ -19,6 +19,7 @@ export interface IMerchant extends mongoose.Document {
   orders: mongoose.Types.ObjectId[];
   orderHistory: mongoose.Types.ObjectId[];
   customers: mongoose.Types.ObjectId[];
+  reviews: mongoose.Types.ObjectId[];
   location?: string;
   online?: boolean;
   role: "merchant";
@@ -140,6 +141,14 @@ const MerchantSchema = new mongoose.Schema(
         ref: "Buyer",
       },
     ],
+
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
+
     orderHistory: [
       {
         type: mongoose.Schema.Types.ObjectId,
