@@ -13,6 +13,7 @@ class ProductController {
       quantity: Joi.number().required(),
       tags: Joi.array().items(Joi.string()).default([]),
       image: Joi.string().required(),
+      unpublish: Joi.boolean().default(false),
     });
 
     /**
@@ -53,7 +54,7 @@ class ProductController {
     });
 
     const { error, value } = requestSchema.validate(req.params);
-    if (error) return response(res, 400, error. details[0].message);
+    if (error) return response(res, 400, error.details[0].message);
 
     const product = await Product.findById(value.id).sort({
       updatedAt: -1,

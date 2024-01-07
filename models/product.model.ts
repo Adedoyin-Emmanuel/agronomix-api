@@ -11,6 +11,7 @@ export interface IProduct {
   tags: string[];
   reviews: string[];
   rating: number;
+  unpublish: boolean;
 }
 const ProductSchema = new mongoose.Schema(
   {
@@ -65,6 +66,12 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       required: false,
       default: 0,
+    },
+
+    unpublish: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   { timestamps: true, versionKey: false }
