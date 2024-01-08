@@ -42,12 +42,6 @@ class ProductController {
     return response(res, 200, "Product created successfully");
   }
 
-  static async getAllProducts(req: Request, res: Response) {
-    const allProducts = await Product.find();
-
-    return response(res, 200, "Products fetched successfully", allProducts);
-  }
-
   static async getProductById(req: Request, res: Response) {
     const requestSchema = Joi.object({
       id: Joi.string().required(),
@@ -56,14 +50,20 @@ class ProductController {
     const { error, value } = requestSchema.validate(req.params);
     if (error) return response(res, 400, error.details[0].message);
 
-    const product = await Product.findById(value.id).sort({
-      updatedAt: -1,
-    });
+    const product = await Product.findById(value.id);
 
     if (!product) return response(res, 404, "Product with given id not found");
 
     return response(res, 200, "Product fetched successfully", product);
   }
+  
+  
+  static async getAllProducts(req: Request, res: Response) {
+    const allProducts = await Product.find();
+
+    return response(res, 200, "Products fetched successfully", allProducts);
+  }
+
 
   static async getAllMerchantProducts(req: Request, res: Response) {
     const merchantId = req.merchant?._id;
