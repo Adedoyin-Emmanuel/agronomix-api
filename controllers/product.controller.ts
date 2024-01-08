@@ -65,6 +65,39 @@ class ProductController {
     return response(res, 200, "Product fetched successfully", product);
   }
 
+  static async getAllMerchantProducts(req: Request, res: Response) {
+    const merchantId = req.merchant?._id;
+
+    const allProducts = await Product.find({ merchantId });
+
+    if (!allProducts)
+      return response(res, 404, "Merchant with given id not found!");
+
+    return response(res, 200, "Products fetched successfully", allProducts);
+  }
+
+  static async getMerchantLatestProducts(req: Request, res: Response) {
+    const merchantId = req.merchant?._id;
+
+    const topLatestProducts = await Product.find({ merchantId })
+      .sort({ dateCreated: -1 })
+      .limit(5);
+
+    if (!topLatestProducts || topLatestProducts.length === 0) {
+      return response(
+        res,
+        404,
+        "Merchant with given id not found or no products found!"
+      );
+    }
+    return response(
+      res,
+      200,
+      "Merchant top products fetched successfully",
+      topLatestProducts
+    );
+  }
+
   static async searchProduct(req: Request, res: Response) {
     const requestSchema = Joi.object({
       searchTerm: Joi.string().required(),
