@@ -9,6 +9,16 @@ productRouter.post(
   [useAuth, useCheckRole("merchant")],
   ProductController.createProduct
 );
+productRouter.get(
+  "/me",
+  [useAuth, useCheckRole("merchant")],
+  ProductController.getAllMerchantProducts
+);
+productRouter.get(
+  "/latest",
+  [useAuth, useCheckRole("merchant")],
+  ProductController.getAllMerchantProducts
+);
 productRouter.get("/search", ProductController.searchProduct);
 productRouter.get("/:id", ProductController.getProductById);
 productRouter.get("/", ProductController.getAllProducts);
