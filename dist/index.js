@@ -65,8 +65,8 @@ app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.de
 app.use(middlewares_1.useNotFound);
 app.use(middlewares_1.useErrorHandler);
 server.listen(PORT, () => {
-    console.log(`Server running on port http://localhost:${PORT}`);
-    utils_2.logger.info({ message: `...app listening on port http://localhost:${PORT}` });
+    console.log(`Server running on port ${PORT}`);
+    utils_2.logger.info({ message: `...app listening on port ${PORT}` });
     (0, utils_1.connectToDb)();
 });
 exports.default = server;
