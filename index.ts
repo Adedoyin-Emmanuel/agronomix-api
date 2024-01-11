@@ -78,8 +78,8 @@ app.use(useNotFound);
 app.use(useErrorHandler);
 
 server.listen(PORT, () => {
-  console.log(`Server running on port http://localhost:${PORT}`);
-  logger.info({ message: `...app listening on port http://localhost:${PORT}` });
+  console.log(`Server running on port ${PORT}`);
+  logger.info({ message: `...app listening on port ${PORT}` });
   connectToDb();
 });
 
