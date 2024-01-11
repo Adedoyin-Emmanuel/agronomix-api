@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const controllers_1 = require("../controllers");
+const middlewares_1 = require("../middlewares");
+const rateLimiter_1 = require("../middlewares/rateLimiter");
+const rateSlowDown_1 = require("../middlewares/rateSlowDown");
+const authRouter = express_1.default.Router();
+authRouter.post("/login", [rateLimiter_1.useLoginRateLimiter, rateSlowDown_1.useLoginSlowDown], controllers_1.AuthController.login);
+authRouter.post("/logout", [middlewares_1.useAuth], controllers_1.AuthController.logout);
+authRouter.post("/refresh-token", controllers_1.AuthController.generateAccessToken);
+authRouter.get("/verify-email", [middlewares_1.useAuth, rateLimiter_1.useVerifyLimiter, rateSlowDown_1.useVerifySlowDown], controllers_1.AuthController.sendEmailToken);
+authRouter.get("/confirm-email", [rateLimiter_1.useVerifyLimiter, rateSlowDown_1.useVerifySlowDown], controllers_1.AuthController.verifyEmailToken);
+authRouter.post("/forgot-password", [rateLimiter_1.useVerifyLimiter, rateSlowDown_1.useVerifySlowDown], controllers_1.AuthController.forgotPassword);
+authRouter.post("/reset-password", [rateLimiter_1.useVerifyLimiter, rateSlowDown_1.useVerifySlowDown], controllers_1.AuthController.resetPassword);
+authRouter.post("/change-password", [middlewares_1.useAuth, rateLimiter_1.useChangePasswordLimiter], controllers_1.AuthController.changePassword);
+exports.default = authRouter;
