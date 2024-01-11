@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.transactionRouter = exports.collectionRouter = exports.productRouter = exports.merchantRouter = exports.buyerRouter = exports.authRouter = exports.helloRouter = void 0;
+const hello_route_1 = __importDefault(require("./hello.route"));
+exports.helloRouter = hello_route_1.default;
+const auth_route_1 = __importDefault(require("./auth.route"));
+exports.authRouter = auth_route_1.default;
+const buyer_route_1 = __importDefault(require("./buyer.route"));
+exports.buyerRouter = buyer_route_1.default;
+const merchant_route_1 = __importDefault(require("./merchant.route"));
+exports.merchantRouter = merchant_route_1.default;
+const product_route_1 = __importDefault(require("./product.route"));
+exports.productRouter = product_route_1.default;
+const collection_route_1 = __importDefault(require("./collection.route"));
+exports.collectionRouter = collection_route_1.default;
+const transaction_route_1 = __importDefault(require("./transaction.route"));
+exports.transactionRouter = transaction_route_1.default;
