@@ -48,7 +48,11 @@ const corsOptions = {
 };
 
 //middlewares
-const allowedOriginPatterns = [/http:\/\/localhost:3000$/];
+const allowedOriginPatterns = [
+  /http:\/\/localhost:3000$/,
+  /^https:\/\/agronomix\.vercel\.app/,
+];
+
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: "100mb" }));
