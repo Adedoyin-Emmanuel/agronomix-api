@@ -3,6 +3,15 @@ import { response } from "../utils";
 import * as crypto from "crypto";
 import Joi from "joi";
 import { Axios } from "../utils";
+import CreateSquadClient from "@squadco/js";
+
+const squad = new CreateSquadClient(
+  process.env.SQUAD_PUBLIC_KEY as string,
+  process.env.SQUAD_PRIVATE_KEY as string,
+  "development"
+);
+
+
 
 class TransactionController {
   static async initiate(req: Request, res: Response) {
@@ -22,26 +31,23 @@ class TransactionController {
     const dataToSend = {
       email,
       amount,
-      initiate_type: initiateType,
+      initiateType: initiateType,
       currency,
-      customer_name: customerName,
-      callback_url: callbackUrl,
+      customerName: customerName,
+      callbackUrl: callbackUrl,
     };
 
-    const squadResponse = await Axios.post("/transaction/initiate", dataToSend);
+    const squadResponse = await squad.initiatePayment(dataToSend);
 
+    console.log(squadResponse.data);
     if (squadResponse.status !== 200)
-      return response(
-        res,
-        400,
-        `An error occured! ${squadResponse.data?.message}`
-      );
+      return response(res, 400, `An error occured! ${squadResponse.message}`);
 
     return response(
       res,
       200,
       "Transaction initiated successfully",
-      squadResponse.data?.data
+      squadResponse.data
     );
   }
 
