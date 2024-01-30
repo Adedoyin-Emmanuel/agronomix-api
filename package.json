@@ -48,6 +48,7 @@
     "node": "18.18.0"
   },
   "dependencies": {
+    "@squadco/js": "^1.2.0",
     "@uploadfly/js": "^1.0.6",
     "axios": "^1.6.3",
     "bcryptjs": "^2.4.3",
